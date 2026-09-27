@@ -1,0 +1,145 @@
+#!/system/bin/sh
+# Galaxy 5G Modem & Band Master CLI Engine
+# Samsung Galaxy M32 5G (MT6853 / Dimensity 720)
+
+STATE_DIR="/data/adb/modem_master_state"
+mkdir -p "$STATE_DIR"
+
+if [ ! -f "$STATE_DIR/orig_pref_mode" ]; then
+    settings get global preferred_network_mode1 > "$STATE_DIR/orig_pref_mode" 2>/dev/null
+    settings get global voice_call_type_enabled > "$STATE_DIR/orig_volte" 2>/dev/null
+    settings get global wfc_ims_enabled > "$STATE_DIR/orig_vowifi" 2>/dev/null
+fi
+
+action="$1"
+shift
+
+case "$action" in
+    status)
+        DUMP=$(dumpsys telephony.registry 2>/dev/null)
+        
+        # Operator
+        op=$(echo "$DUMP" | grep -m 1 "mOperatorAlphaLong=" | sed -E 's/.*mOperatorAlphaLong=([^,]+).*/\1/')
+        [ -z "$op" ] && op=$(getprop gsm.sim.operator.alpha 2>/dev/null || echo "Unknown")
+        
+        # RAT
+        rat=$(echo "$DUMP" | grep -m 1 "getRilDataRadioTechnology=" | sed -E 's/.*getRilDataRadioTechnology=[0-9]+\(([^)]+)\).*/\1/')
+        [ -z "$rat" ] && rat=$(getprop gsm.network.type 2>/dev/null || echo "Unknown")
+        
+        # Band
+        band_num=$(echo "$DUMP" | grep -m 1 "mBands = " | sed -E 's/.*mBands = \[([0-9]+)\].*/\1/')
+        if [ -n "$band_num" ]; then
+            case "$rat" in
+                *NR*) band="n$band_num" ;;
+                *) band="B$band_num" ;;
+            esac
+        else
+            band="Unknown"
+        fi
+        
+        # ARFCN
+        arfcn=$(echo "$DUMP" | grep -m 1 "mNrArfcn = " | sed -E 's/.*mNrArfcn = ([0-9]+).*/\1/')
+        [ -z "$arfcn" ] && arfcn=$(echo "$DUMP" | grep -m 1 "mChannelNumber=" | sed -E 's/.*mChannelNumber=([0-9]+).*/\1/')
+        [ -z "$arfcn" ] && arfcn="0"
+        
+        # Bandwidth
+        bw_khz=$(echo "$DUMP" | grep -m 1 "mCellBandwidths=\[" | sed -E 's/.*mCellBandwidths=\[([0-9]+)\].*/\1/')
+        if [ -n "$bw_khz" ] && [ "$bw_khz" -gt 0 ] 2>/dev/null; then
+            bw_mhz=$((bw_khz / 1000))
+        else
+            bw_mhz=0
+        fi
+        
+        # PCI
+        pci=$(echo "$DUMP" | grep -m 1 "mPhysicalCellId=" | sed -E 's/.*mPhysicalCellId=([0-9]+).*/\1/')
+        [ -z "$pci" ] && pci="N/A"
+        
+        # Signal Metrics
+        rsrp=$(echo "$DUMP" | grep -m 1 "ssRsrp = " | sed -E 's/.*ssRsrp = (-?[0-9]+).*/\1/')
+        [ "$rsrp" = "2147483647" ] || [ -z "$rsrp" ] && rsrp="-999"
+        
+        rsrq=$(echo "$DUMP" | grep -m 1 "ssRsrq = " | sed -E 's/.*ssRsrq = (-?[0-9]+).*/\1/')
+        [ "$rsrq" = "2147483647" ] || [ -z "$rsrq" ] && rsrq="-999"
+        
+        sinr=$(echo "$DUMP" | grep -m 1 "ssSinr = " | sed -E 's/.*ssSinr = (-?[0-9]+).*/\1/')
+        [ "$sinr" = "2147483647" ] || [ -z "$sinr" ] && sinr="-999"
+        
+        level=$(echo "$DUMP" | grep -m 1 "nrLevel=" | sed -E 's/.*nrLevel=([0-9]+).*/\1/')
+        [ -z "$level" ] && level="0"
+        
+        # Preferred mode & IMS
+        pref_mode=$(settings get global preferred_network_mode1 2>/dev/null || echo "26")
+        volte_val=$(settings get global voice_call_type_enabled 2>/dev/null || echo "0")
+        vowifi_val=$(settings get global wfc_ims_enabled 2>/dev/null || echo "0")
+        
+        # IMS Daemon
+        imsd_running=$(getprop init.svc.imsd 2>/dev/null || echo "stopped")
+        
+        echo "{"
+        echo "  \"operator\": \"$op\","
+        echo "  \"rat\": \"$rat\","
+        echo "  \"band\": \"$band\","
+        echo "  \"arfcn\": $arfcn,"
+        echo "  \"bandwidth_mhz\": $bw_mhz,"
+        echo "  \"pci\": \"$pci\","
+        echo "  \"rsrp\": $rsrp,"
+        echo "  \"rsrq\": $rsrq,"
+        echo "  \"sinr\": $sinr,"
+        echo "  \"signal_level\": $level,"
+        echo "  \"preferred_mode\": \"$pref_mode\","
+        echo "  \"volte_enabled\": $( [ "$volte_val" = "1" ] && echo "true" || echo "false" ),"
+        echo "  \"vowifi_enabled\": $( [ "$vowifi_val" = "1" ] && echo "true" || echo "false" ),"
+        echo "  \"imsd_status\": \"$imsd_running\","
+        echo "  \"supported_5g\": [\"n1\", \"n3\", \"n5\", \"n7\", \"n8\", \"n20\", \"n28\", \"n38\", \"n40\", \"n41\", \"n77\", \"n78\"],"
+        echo "  \"supported_4g\": [\"B1\", \"B2\", \"B3\", \"B4\", \"B5\", \"B7\", \"B8\", \"B12\", \"B17\", \"B20\", \"B26\", \"B28\", \"B38\", \"B40\", \"B41\", \"B66\"]"
+        echo "}"
+        ;;
+
+    set_network_mode)
+        mode="$1"
+        if [ -n "$mode" ]; then
+            settings put global preferred_network_mode1 "$mode"
+            settings put global preferred_network_mode "$mode"
+            service call phone 81 i32 1 i32 "$mode" >/dev/null 2>&1
+            echo "{\"status\": \"ok\", \"message\": \"Network mode set to $mode\"}"
+        fi
+        ;;
+
+    set_volte)
+        val="$1"
+        settings put global voice_call_type_enabled "$val"
+        setprop persist.vendor.mtk.volte.enable "$val" 2>/dev/null
+        echo "{\"status\": \"ok\", \"message\": \"VoLTE updated to $val\"}"
+        ;;
+
+    set_vowifi)
+        val="$1"
+        settings put global wfc_ims_enabled "$val"
+        settings put global wfc_ims_mode 1 2>/dev/null
+        echo "{\"status\": \"ok\", \"message\": \"VoWiFi updated to $val\"}"
+        ;;
+
+    launch_servicemode)
+        code="$1"
+        [ -z "$code" ] && code="0011"
+        am broadcast -a com.samsung.android.action.SECRET_CODE -d "android_secret_code://$code" -n com.sec.android.RilServiceModeApp/.SecKeyStringBroadcastReceiver >/dev/null 2>&1
+        echo "{\"status\": \"ok\", \"message\": \"Broadcasted Samsung Secret Code *#$code#\"}"
+        ;;
+
+    revert)
+        orig_mode=$(cat "$STATE_DIR/orig_pref_mode" 2>/dev/null || echo "26")
+        settings put global preferred_network_mode1 "$orig_mode"
+        settings put global preferred_network_mode "$orig_mode"
+        service call phone 81 i32 1 i32 "$orig_mode" >/dev/null 2>&1
+        
+        orig_volte=$(cat "$STATE_DIR/orig_volte" 2>/dev/null || echo "1")
+        settings put global voice_call_type_enabled "$orig_volte"
+        setprop persist.vendor.mtk.volte.enable 1 2>/dev/null
+        
+        echo "{\"status\": \"ok\", \"message\": \"Network settings reverted to factory defaults (Mode $orig_mode)\"}"
+        ;;
+
+    *)
+        echo "{\"status\": \"error\", \"message\": \"Unknown action $action\"}"
+        ;;
+esac

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy 5G Modem & Band Master</title>
+    <style>
+        :root {
+            --bg: #090d16;
+            --surface: #111827;
+            --surface-hover: #1f2937;
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.4);
+            --accent: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text: #f9fafb;
+            --text-dim: #9ca3af;
+            --border: #1f2937;
+            --active-band: #059669;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 1.5rem; line-height: 1.5; }
+        .container { max-width: 1050px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .title-box h1 { font-size: 1.6rem; color: #fff; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+        .badge { background: #1f2937; color: #60a5fa; font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid #3b82f6; font-weight: 600; }
+        .badge.nr { background: #064e3b; color: #34d399; border-color: #10b981; }
+        .badge.lte { background: #1e3a8a; color: #93c5fd; border-color: #3b82f6; }
+        .subtitle { color: var(--text-dim); font-size: 0.85rem; margin-top: 0.2rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.2rem; margin-bottom: 1.5rem; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-weight: 600; font-size: 1.05rem; }
+        .stat-row { display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: var(--text-dim); }
+        .stat-val { font-weight: 600; font-family: monospace; }
+        
+        /* Signal Meters */
+        .meter-container { margin: 0.6rem 0; }
+        .meter-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.25rem; }
+        .meter-bar { width: 100%; height: 8px; background: #1f2937; border-radius: 4px; overflow: hidden; }
+        .meter-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.4s ease; }
+        .meter-fill.warn { background: var(--warning); }
+        .meter-fill.bad { background: var(--danger); }
+
+        /* Band Chips Grid */
+        .bands-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+        .band-chip { background: #1f2937; color: #d1d5db; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; border: 1px solid #374151; font-family: monospace; }
+        .band-chip.active { background: #059669; color: #fff; border-color: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+
+        /* Controls */
+        .btn { background: var(--primary); color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: background 0.2s; }
+        .btn:hover { background: #2563eb; }
+        .btn-danger { background: var(--danger); }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--surface-hover); }
+        select { background: #0b0f19; border: 1px solid var(--border); color: #fff; padding: 0.5rem 0.7rem; border-radius: 6px; font-size: 0.9rem; outline: none; width: 100%; margin-top: 0.4rem; }
+        select:focus { border-color: var(--primary); }
+
+        .toggle-group { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .toggle-group:last-child { border-bottom: none; }
+        .toggle-desc { font-size: 0.8rem; color: var(--text-dim); }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        #toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: #fff; border: 1px solid var(--primary); padding: 0.8rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: none; z-index: 1000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-box">
+                <h1>📡 Galaxy 5G Modem & Band Master <span class="badge nr" id="badge-rat">5G SA</span></h1>
+                <div class="subtitle">Samsung Galaxy M32 5G (MT6853) Cellular Telemetry & Band Locker</div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button class="btn btn-outline" onclick="loadStatus()">🔄 Refresh</button>
+                <button class="btn btn-danger" onclick="revertDefaults()">⚠️ Revert Network Defaults</button>
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- Live Serving Cell -->
+            <div class="card">
+                <div class="card-header">
+                    <span>📡 Live Serving Cell</span>
+                    <span class="badge" id="badge-operator">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Active Band</span>
+                    <span class="stat-val" style="color: #34d399; font-size: 1.1rem;" id="val-band">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Radio Tech (RAT)</span>
+                    <span class="stat-val" id="val-rat">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">NR-ARFCN / EARFCN</span>
+                    <span class="stat-val" id="val-arfcn">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Channel Bandwidth</span>
+                    <span class="stat-val" id="val-bw">-- MHz</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Physical Cell ID (PCI)</span>
+                    <span class="stat-val" id="val-pci">--</span>
+                </div>
+            </div>
+
+            <!-- Live Signal RF Metrics -->
+            <div class="card">
+                <div class="card-header">
+                    <span>📶 RF Signal Quality</span>
+                    <span class="badge" id="badge-level">Bars: --</span>
+                </div>
+                <!-- RSRP Meter -->
+                <div class="meter-container">
+                    <div class="meter-header">
+                        <span class="stat-label">SS-RSRP (Signal Power)</span>
+                        <span class="stat-val" id="val-rsrp">-- dBm</span>
+                    </div>
+                    <div class="meter-bar"><div class="meter-fill" id="fill-rsrp"></div></div>
+                </div>
+                <!-- RSRQ Meter -->
+                <div class="meter-container">
+                    <div class="meter-header">
+                        <span class="stat-label">SS-RSRQ (Signal Quality)</span>
+                        <span class="stat-val" id="val-rsrq">-- dB</span>
+                    </div>
+                    <div class="meter-bar"><div class="meter-fill" id="fill-rsrq"></div></div>
+                </div>
+                <!-- SINR Meter -->
+                <div class="meter-container">
+                    <div class="meter-header">
+                        <span class="stat-label">SS-SINR (Signal-to-Noise Ratio)</span>
+                        <span class="stat-val" id="val-sinr">-- dB</span>
+                    </div>
+                    <div class="meter-bar"><div class="meter-fill" id="fill-sinr"></div></div>
+                </div>
+            </div>
+
+            <!-- Network Mode Locker -->
+            <div class="card">
+                <div class="card-header">
+                    <span>🔒 Network Mode Locker</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.5rem;">
+                    Lock device to pure 5G Standalone to eliminate random drops to 4G/LTE.
+                </p>
+                <select id="sel-netmode" onchange="changeNetworkMode(this.value)">
+                    <option value="33">⚡ Force 5G Only (NR Only - Pure Standalone)</option>
+                    <option value="28">🚀 Force 5G / 4G (NR / LTE Only - No 2G/3G)</option>
+                    <option value="11">📶 Force 4G Only (LTE Only)</option>
+                    <option value="9">📞 4G / 3G / 2G (LTE / WCDMA / GSM)</option>
+                    <option value="26">🔄 Auto 5G / 4G / 3G / 2G (Factory Default)</option>
+                </select>
+                <div style="margin-top: 1rem;">
+                    <div style="font-size: 0.85rem; color: var(--text-dim);">Current Active RIL Mode: <span class="stat-val" id="val-prefmode">--</span></div>
+                </div>
+            </div>
+
+            <!-- IMS & Modem Features -->
+            <div class="card">
+                <div class="card-header">
+                    <span>📞 VoLTE & VoWiFi Controller</span>
+                    <span class="badge" id="badge-ims">IMS: --</span>
+                </div>
+                <div class="toggle-group">
+                    <div>
+                        <div style="font-weight: 600;">VoLTE / VoNR Calling</div>
+                        <div class="toggle-desc">High Definition Voice over LTE / 5G</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="chk-volte" onchange="toggleVoLTE(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-group">
+                    <div>
+                        <div style="font-weight: 600;">VoWiFi (Wi-Fi Calling)</div>
+                        <div class="toggle-desc">Tunnel voice calls over Wi-Fi (ePDG)</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="chk-vowifi" onchange="toggleVoWiFi(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+                    <button class="btn btn-outline" style="flex: 1;" onclick="launchServiceMode('0011')">Launch ServiceMode (*#0011#)</button>
+                    <button class="btn btn-outline" style="flex: 1;" onclick="launchServiceMode('2263')">Band Selection (*#2263#)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supported Bands Directory -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <span>📋 Device Hardware Certified Bands (SM-M326B / MT6853)</span>
+            </div>
+            <div>
+                <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.3rem; font-weight: 600;">
+                    5G NR Bands (12 Bands Supported):
+                </div>
+                <div class="bands-grid" id="grid-5g-bands"></div>
+            </div>
+            <div style="margin-top: 1rem;">
+                <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.3rem; font-weight: 600;">
+                    4G LTE Bands (15 Bands Supported):
+                </div>
+                <div class="bands-grid" id="grid-4g-bands"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">Settings updated</div>
+
+    <script>
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 3000);
+        }
+
+        async function api(action, val = '') {
+            try {
+                const res = await fetch(`/cgi-bin/api.cgi?action=${action}&val=${encodeURIComponent(val)}`);
+                return await res.json();
+            } catch (e) {
+                console.error(e);
+                return { status: 'error', message: e.toString() };
+            }
+        }
+
+        async function loadStatus() {
+            const d = await api('status');
+            if (d && d.operator) {
+                document.getElementById('badge-operator').innerText = d.operator;
+                document.getElementById('val-rat').innerText = d.rat;
+                document.getElementById('val-band').innerText = d.band;
+                document.getElementById('val-arfcn').innerText = d.arfcn;
+                document.getElementById('val-bw').innerText = d.bandwidth_mhz > 0 ? `${d.bandwidth_mhz} MHz` : 'N/A';
+                document.getElementById('val-pci').innerText = d.pci;
+                document.getElementById('badge-rat').innerText = d.rat.replace('_', ' ');
+
+                // RSRP
+                if (d.rsrp > -900) {
+                    document.getElementById('val-rsrp').innerText = `${d.rsrp} dBm`;
+                    // Scale -140dBm to -60dBm into 0-100%
+                    let rsrpPct = Math.min(100, Math.max(0, ((d.rsrp - (-140)) / (80)) * 100));
+                    const fRsrp = document.getElementById('fill-rsrp');
+                    fRsrp.style.width = `${rsrpPct}%`;
+                    fRsrp.className = d.rsrp > -95 ? 'meter-fill' : d.rsrp > -110 ? 'meter-fill warn' : 'meter-fill bad';
+                }
+
+                // RSRQ
+                if (d.rsrq > -900) {
+                    document.getElementById('val-rsrq').innerText = `${d.rsrq} dB`;
+                    let rsrqPct = Math.min(100, Math.max(0, ((d.rsrq - (-20)) / (17)) * 100));
+                    document.getElementById('fill-rsrq').style.width = `${rsrqPct}%`;
+                }
+
+                // SINR
+                if (d.sinr > -900) {
+                    document.getElementById('val-sinr').innerText = `${d.sinr} dB`;
+                    let sinrPct = Math.min(100, Math.max(0, ((d.sinr - (-10)) / (40)) * 100));
+                    const fSinr = document.getElementById('fill-sinr');
+                    fSinr.style.width = `${sinrPct}%`;
+                    fSinr.className = d.sinr > 15 ? 'meter-fill' : d.sinr > 5 ? 'meter-fill warn' : 'meter-fill bad';
+                }
+
+                document.getElementById('badge-level').innerText = `Signal: ${d.signal_level} / 4`;
+                document.getElementById('badge-ims').innerText = `IMSD: ${d.imsd_status.toUpperCase()}`;
+
+                // Selects & Toggles
+                document.getElementById('sel-netmode').value = d.preferred_mode.split(',')[0];
+                document.getElementById('val-prefmode').innerText = `Mode ${d.preferred_mode}`;
+                document.getElementById('chk-volte').checked = d.volte_enabled;
+                document.getElementById('chk-vowifi').checked = d.vowifi_enabled;
+
+                // Render Bands
+                renderBands('grid-5g-bands', d.supported_5g, d.band);
+                renderBands('grid-4g-bands', d.supported_4g, d.band);
+            }
+        }
+
+        function renderBands(elId, bands, activeBand) {
+            const container = document.getElementById(elId);
+            container.innerHTML = '';
+            bands.forEach(b => {
+                const chip = document.createElement('div');
+                chip.className = 'band-chip' + (b.toLowerCase() === activeBand.toLowerCase() ? ' active' : '');
+                chip.innerText = b;
+                container.appendChild(chip);
+            });
+        }
+
+        async function changeNetworkMode(val) {
+            const res = await api('set_network_mode', val);
+            showToast(res.message);
+            loadStatus();
+        }
+
+        async function toggleVoLTE(val) {
+            const res = await api('set_volte', val ? '1' : '0');
+            showToast(res.message);
+        }
+
+        async function toggleVoWiFi(val) {
+            const res = await api('set_vowifi', val ? '1' : '0');
+            showToast(res.message);
+        }
+
+        async function launchServiceMode(code) {
+            const res = await api('launch_servicemode', code);
+            showToast(res.message);
+        }
+
+        async function revertDefaults() {
+            if (!confirm('Revert Network Mode and IMS to Factory Defaults?')) return;
+            const res = await api('revert');
+            showToast(res.message);
+            loadStatus();
+        }
+
+        window.onload = loadStatus;
+        setInterval(loadStatus, 4000);
+    </script>
+</body>
+</html>
