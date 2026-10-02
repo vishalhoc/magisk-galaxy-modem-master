@@ -1,5 +1,6 @@
 #!/system/bin/sh
 # Galaxy 5G Modem & Band Master Background Service
+# Author: hoc
 MODDIR=${0%/*}
 
 while [ "$(getprop sys.boot_completed)" != "1" ]; do

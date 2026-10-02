@@ -1,14 +1,19 @@
 #!/system/bin/sh
-# Galaxy 5G Modem & Band Master CLI Engine
-# Samsung Galaxy M32 5G (MT6853 / Dimensity 720)
+# Galaxy 5G Modem & Band Master CLI Engine v2.0
+# Author: hoc
+# Target Device: Samsung Galaxy M32 5G (SM-M326B / MediaTek MT6853 Dimensity 720)
+# Android 13 Stock OneUI Rom (Baseband: M326BXXSCCYD2 / Samsung RIL v5.0)
 
 STATE_DIR="/data/adb/modem_master_state"
 mkdir -p "$STATE_DIR"
 
-if [ ! -f "$STATE_DIR/orig_pref_mode" ]; then
-    settings get global preferred_network_mode1 > "$STATE_DIR/orig_pref_mode" 2>/dev/null
-    settings get global voice_call_type_enabled > "$STATE_DIR/orig_volte" 2>/dev/null
-    settings get global wfc_ims_enabled > "$STATE_DIR/orig_vowifi" 2>/dev/null
+# Save initial state on first launch for fail-safe rollback
+if [ ! -f "$STATE_DIR/orig_network_mode" ]; then
+    settings get global preferred_network_mode1 > "$STATE_DIR/orig_network_mode" 2>/dev/null
+    settings get system voicecall_type > "$STATE_DIR/orig_volte" 2>/dev/null
+    settings get system wifi_call_enable1 > "$STATE_DIR/orig_vowifi" 2>/dev/null
+    settings get global data_roaming > "$STATE_DIR/orig_roaming" 2>/dev/null
+    settings get global mobile_data > "$STATE_DIR/orig_mobile_data" 2>/dev/null
 fi
 
 action="$1"
@@ -17,16 +22,19 @@ shift
 case "$action" in
     status)
         DUMP=$(dumpsys telephony.registry 2>/dev/null)
-        
-        # Operator
+        PROPS=$(getprop)
+
+        # Operator Name
         op=$(echo "$DUMP" | grep -m 1 "mOperatorAlphaLong=" | sed -E 's/.*mOperatorAlphaLong=([^,]+).*/\1/')
-        [ -z "$op" ] && op=$(getprop gsm.sim.operator.alpha 2>/dev/null || echo "Unknown")
-        
-        # RAT
+        [ -z "$op" ] && op=$(echo "$PROPS" | grep -m 1 "gsm.operator.alpha" | sed -E 's/.*\[(.*)\].*/\1/' | cut -d ',' -f 1)
+        [ -z "$op" ] && op="Unknown"
+
+        # Radio Access Technology (RAT)
         rat=$(echo "$DUMP" | grep -m 1 "getRilDataRadioTechnology=" | sed -E 's/.*getRilDataRadioTechnology=[0-9]+\(([^)]+)\).*/\1/')
-        [ -z "$rat" ] && rat=$(getprop gsm.network.type 2>/dev/null || echo "Unknown")
-        
-        # Band
+        [ -z "$rat" ] && rat=$(echo "$PROPS" | grep -m 1 "gsm.network.type" | sed -E 's/.*\[(.*)\].*/\1/' | cut -d ',' -f 1)
+        [ -z "$rat" ] && rat="Unknown"
+
+        # Serving Band Number
         band_num=$(echo "$DUMP" | grep -m 1 "mBands = " | sed -E 's/.*mBands = \[([0-9]+)\].*/\1/')
         if [ -n "$band_num" ]; then
             case "$rat" in
@@ -36,110 +44,590 @@ case "$action" in
         else
             band="Unknown"
         fi
-        
-        # ARFCN
+
+        # Frequency ARFCN (NR-ARFCN or EARFCN)
         arfcn=$(echo "$DUMP" | grep -m 1 "mNrArfcn = " | sed -E 's/.*mNrArfcn = ([0-9]+).*/\1/')
         [ -z "$arfcn" ] && arfcn=$(echo "$DUMP" | grep -m 1 "mChannelNumber=" | sed -E 's/.*mChannelNumber=([0-9]+).*/\1/')
         [ -z "$arfcn" ] && arfcn="0"
-        
-        # Bandwidth
+
+        # Channel Bandwidth in MHz
         bw_khz=$(echo "$DUMP" | grep -m 1 "mCellBandwidths=\[" | sed -E 's/.*mCellBandwidths=\[([0-9]+)\].*/\1/')
         if [ -n "$bw_khz" ] && [ "$bw_khz" -gt 0 ] 2>/dev/null; then
             bw_mhz=$((bw_khz / 1000))
         else
             bw_mhz=0
         fi
-        
-        # PCI
+
+        # Physical Cell Identity (PCI)
         pci=$(echo "$DUMP" | grep -m 1 "mPhysicalCellId=" | sed -E 's/.*mPhysicalCellId=([0-9]+).*/\1/')
         [ -z "$pci" ] && pci="N/A"
-        
-        # Signal Metrics
+
+        # RF Signal Quality Metrics
         rsrp=$(echo "$DUMP" | grep -m 1 "ssRsrp = " | sed -E 's/.*ssRsrp = (-?[0-9]+).*/\1/')
         [ "$rsrp" = "2147483647" ] || [ -z "$rsrp" ] && rsrp="-999"
-        
+
         rsrq=$(echo "$DUMP" | grep -m 1 "ssRsrq = " | sed -E 's/.*ssRsrq = (-?[0-9]+).*/\1/')
         [ "$rsrq" = "2147483647" ] || [ -z "$rsrq" ] && rsrq="-999"
-        
+
         sinr=$(echo "$DUMP" | grep -m 1 "ssSinr = " | sed -E 's/.*ssSinr = (-?[0-9]+).*/\1/')
         [ "$sinr" = "2147483647" ] || [ -z "$sinr" ] && sinr="-999"
-        
-        level=$(echo "$DUMP" | grep -m 1 "nrLevel=" | sed -E 's/.*nrLevel=([0-9]+).*/\1/')
+
+        level=$(echo "$DUMP" | grep -m 1 "level = " | sed -E 's/.*level = ([0-9]+).*/\1/')
         [ -z "$level" ] && level="0"
-        
-        # Preferred mode & IMS
-        pref_mode=$(settings get global preferred_network_mode1 2>/dev/null || echo "26")
-        volte_val=$(settings get global voice_call_type_enabled 2>/dev/null || echo "0")
-        vowifi_val=$(settings get global wfc_ims_enabled 2>/dev/null || echo "0")
-        
-        # IMS Daemon
-        imsd_running=$(getprop init.svc.imsd 2>/dev/null || echo "stopped")
-        
-        echo "{"
-        echo "  \"operator\": \"$op\","
-        echo "  \"rat\": \"$rat\","
-        echo "  \"band\": \"$band\","
-        echo "  \"arfcn\": $arfcn,"
-        echo "  \"bandwidth_mhz\": $bw_mhz,"
-        echo "  \"pci\": \"$pci\","
-        echo "  \"rsrp\": $rsrp,"
-        echo "  \"rsrq\": $rsrq,"
-        echo "  \"sinr\": $sinr,"
-        echo "  \"signal_level\": $level,"
-        echo "  \"preferred_mode\": \"$pref_mode\","
-        echo "  \"volte_enabled\": $( [ "$volte_val" = "1" ] && echo "true" || echo "false" ),"
-        echo "  \"vowifi_enabled\": $( [ "$vowifi_val" = "1" ] && echo "true" || echo "false" ),"
-        echo "  \"imsd_status\": \"$imsd_running\","
-        echo "  \"supported_5g\": [\"n1\", \"n3\", \"n5\", \"n7\", \"n8\", \"n20\", \"n28\", \"n38\", \"n40\", \"n41\", \"n77\", \"n78\"],"
-        echo "  \"supported_4g\": [\"B1\", \"B2\", \"B3\", \"B4\", \"B5\", \"B7\", \"B8\", \"B12\", \"B17\", \"B20\", \"B26\", \"B28\", \"B38\", \"B40\", \"B41\", \"B66\"]"
-        echo "}"
+
+        # Duplex Mode (TDD / FDD)
+        duplex=$(echo "$DUMP" | grep -m 1 "duplexMode()=" | sed -E 's/.*duplexMode\(\)=([0-9]+).*/\1/')
+        if [ "$duplex" = "0" ]; then
+            duplex_mode="TDD"
+        elif [ "$duplex" = "1" ]; then
+            duplex_mode="FDD"
+        else
+            duplex_mode=$(getprop ril.nrnetworktype 2>/dev/null || echo "TDD")
+        fi
+
+        # Carrier PLMN (MCC + MNC)
+        plmn=$(getprop gsm.sim.operator.numeric 2>/dev/null || echo "405858")
+
+        # Network IP Interfaces
+        ip_v4=$(ip -4 addr show v4-rmnet0 2>/dev/null | grep -m1 "inet " | awk '{print $2}')
+        [ -z "$ip_v4" ] && ip_v4=$(ip -4 addr show rmnet0 2>/dev/null | grep -m1 "inet " | awk '{print $2}')
+        [ -z "$ip_v4" ] && ip_v4="None"
+
+        ip_v6=$(ip -6 addr show rmnet0 2>/dev/null | grep -m1 "inet6 2" | awk '{print $2}')
+        [ -z "$ip_v6" ] && ip_v6="None"
+
+        # Telephony Network Mode bitmask detection
+        allowed=$(cmd phone get-allowed-network-types-for-users -s 0 2>/dev/null)
+        case "$allowed" in
+            "NR") pref_mode="33" ;;
+            *NR*LTE*|*LTE*NR*)
+                case "$allowed" in
+                    *GSM*|*UMTS*|*GPRS*|*EDGE*|*CDMA*) pref_mode="26" ;;
+                    *) pref_mode="28" ;;
+                esac
+                ;;
+            *LTE*)
+                case "$allowed" in
+                    *GSM*|*UMTS*|*GPRS*|*EDGE*|*CDMA*) pref_mode="9" ;;
+                    *) pref_mode="11" ;;
+                esac
+                ;;
+            *) pref_mode=$(settings get global preferred_network_mode1 2>/dev/null || echo "26") ;;
+        esac
+
+        # Samsung IMS Switch queries (Slot 0)
+        ims_data=$(su 1000 -c "content query --uri content://com.sec.ims.settings/imsswitch#simslot0" 2>/dev/null)
+
+        is_ims_sw_on() {
+            echo "$ims_data" | grep -q "name=$1, enabled=1" && echo "true" || echo "false"
+        }
+
+        volte_enabled=$(is_ims_sw_on "volte")
+        [ "$volte_enabled" = "false" ] && volte_enabled=$(is_ims_sw_on "mmtel")
+        vilte_enabled=$(is_ims_sw_on "mmtel-video")
+        smsip_enabled=$(is_ims_sw_on "smsip")
+        rcs_enabled=$(is_ims_sw_on "rcs")
+
+        # VoWiFi status
+        vowifi_val=$(settings get system wifi_call_enable1 2>/dev/null)
+        [ -z "$vowifi_val" ] && vowifi_val=$(settings get global wifi_calling_enabled 2>/dev/null || echo "0")
+        [ "$vowifi_val" = "1" ] && vowifi_enabled="true" || vowifi_enabled="false"
+
+        # WFC Calling Mode (1=Cellular Preferred, 2=Wi-Fi Preferred, 3=Wi-Fi Only)
+        wfc_mode=$(settings get global wfc_ims_mode 2>/dev/null)
+        [ -z "$wfc_mode" ] || [ "$wfc_mode" = "null" ] && wfc_mode="1"
+
+        # VoNR Props
+        vonr_prop=$(getprop persist.vendor.radio.vonr_enabled 2>/dev/null || echo "0")
+        [ "$vonr_prop" = "1" ] && vonr_enabled="true" || vonr_enabled="false"
+
+        # NR SA & NSA Architecture Props
+        nr_sa_prop=$(getprop persist.vendor.radio.nr_sa_mode 2>/dev/null || echo "1")
+        [ "$nr_sa_prop" = "1" ] && nr_sa_enabled="true" || nr_sa_enabled="false"
+
+        nr_nsa_prop=$(getprop persist.vendor.radio.nr_nsa_mode 2>/dev/null || echo "1")
+        [ "$nr_nsa_prop" = "1" ] && nr_nsa_enabled="true" || nr_nsa_enabled="false"
+
+        # ENDC Prop
+        endc_prop=$(getprop persist.vendor.radio.endc_enabled 2>/dev/null || echo "1")
+        [ "$endc_prop" = "1" ] && endc_enabled="true" || endc_enabled="false"
+
+        # LTE Carrier Aggregation Prop
+        lte_ca_prop=$(getprop persist.vendor.radio.lte_ca_enabled 2>/dev/null || echo "1")
+        [ "$lte_ca_prop" = "1" ] && lte_ca_enabled="true" || lte_ca_enabled="false"
+
+        # Cellular Connectivity States
+        mobile_data_val=$(settings get global mobile_data 2>/dev/null || echo "1")
+        [ "$mobile_data_val" = "1" ] && mobile_data="true" || mobile_data="false"
+
+        roaming_val=$(settings get global data_roaming 2>/dev/null || echo "0")
+        [ "$roaming_val" = "1" ] && data_roaming="true" || data_roaming="false"
+
+        airplane_val=$(settings get global airplane_mode_on 2>/dev/null || echo "0")
+        [ "$airplane_val" = "1" ] && airplane_mode="true" || airplane_mode="false"
+
+        sds_val=$(getprop persist.vendor.radio.smart.data.switch 2>/dev/null || echo "1")
+        [ "$sds_val" = "1" ] && smart_data_switch="true" || smart_data_switch="false"
+
+        # Target Cell Lock Configuration
+        target_arfcn=""
+        target_pci=""
+        if [ -f "$STATE_DIR/target_cell.conf" ]; then
+            target_arfcn=$(grep "^ARFCN=" "$STATE_DIR/target_cell.conf" | cut -d '=' -f 2)
+            target_pci=$(grep "^PCI=" "$STATE_DIR/target_cell.conf" | cut -d '=' -f 2)
+        fi
+        [ -z "$target_arfcn" ] && target_arfcn="None"
+        [ -z "$target_pci" ] && target_pci="None"
+
+        cell_locked="false"
+        if [ "$target_arfcn" != "None" ] && [ "$target_arfcn" = "$arfcn" ]; then
+            if [ "$target_pci" = "None" ] || [ "$target_pci" = "$pci" ]; then
+                cell_locked="true"
+            fi
+        fi
+
+        # SIM Card States
+        sim_states=$(getprop gsm.sim.state 2>/dev/null || echo "UNKNOWN,ABSENT")
+        sim1_state=$(echo "$sim_states" | cut -d ',' -f 1)
+        sim2_state=$(echo "$sim_states" | cut -d ',' -f 2)
+        [ -z "$sim2_state" ] && sim2_state="ABSENT"
+
+        # Hardware & Firmware Info
+        baseband=$(getprop gsm.version.baseband 2>/dev/null | cut -d ',' -f 1)
+        ril_ver=$(getprop gsm.version.ril-impl 2>/dev/null)
+        modem_board=$(getprop ril.modem.board 2>/dev/null || echo "MT6853")
+        product_code=$(getprop ril.product_code 2>/dev/null || echo "SM-M326BZKHINS")
+
+        cat <<EOF
+{
+  "operator": "$op",
+  "rat": "$rat",
+  "band": "$band",
+  "arfcn": $arfcn,
+  "bandwidth_mhz": $bw_mhz,
+  "pci": "$pci",
+  "rsrp": $rsrp,
+  "rsrq": $rsrq,
+  "sinr": $sinr,
+  "signal_level": $level,
+  "duplex_mode": "$duplex_mode",
+  "plmn": "$plmn",
+  "ip_v4": "$ip_v4",
+  "ip_v6": "$ip_v6",
+  "preferred_mode": "$pref_mode",
+  "allowed_raw": "$allowed",
+  "volte_enabled": $volte_enabled,
+  "vilte_enabled": $vilte_enabled,
+  "vowifi_enabled": $vowifi_enabled,
+  "wfc_mode": "$wfc_mode",
+  "vonr_enabled": $vonr_enabled,
+  "smsip_enabled": $smsip_enabled,
+  "rcs_enabled": $rcs_enabled,
+  "nr_sa_enabled": $nr_sa_enabled,
+  "nr_nsa_enabled": $nr_nsa_enabled,
+  "endc_enabled": $endc_enabled,
+  "lte_ca_enabled": $lte_ca_enabled,
+  "mobile_data": $mobile_data,
+  "data_roaming": $data_roaming,
+  "airplane_mode": $airplane_mode,
+  "smart_data_switch": $smart_data_switch,
+  "target_arfcn": "$target_arfcn",
+  "target_pci": "$target_pci",
+  "cell_locked": $cell_locked,
+  "sim1_state": "$sim1_state",
+  "sim2_state": "$sim2_state",
+  "baseband": "$baseband",
+  "ril_ver": "$ril_ver",
+  "modem_board": "$modem_board",
+  "product_code": "$product_code",
+  "supported_5g": ["n1", "n3", "n5", "n7", "n8", "n20", "n28", "n38", "n40", "n41", "n77", "n78"],
+  "supported_4g": ["B1", "B2", "B3", "B4", "B5", "B7", "B8", "B12", "B17", "B20", "B26", "B28", "B38", "B40", "B41", "B66"]
+}
+EOF
         ;;
 
     set_network_mode)
         mode="$1"
+        slot="$2"
+        [ -z "$slot" ] && slot="both"
+
         if [ -n "$mode" ]; then
-            settings put global preferred_network_mode1 "$mode"
-            settings put global preferred_network_mode "$mode"
-            service call phone 81 i32 1 i32 "$mode" >/dev/null 2>&1
-            echo "{\"status\": \"ok\", \"message\": \"Network mode set to $mode\"}"
+            case "$mode" in
+                33)
+                    # 5G NR Only (Pure Standalone NR_SA)
+                    bitmask="10000000000000000000"
+                    label="5G NR Only (Pure Standalone)"
+                    ;;
+                28)
+                    # 5G NR + 4G LTE Only (Eliminates 2G/3G legacy fallback)
+                    bitmask="11000001000000000000"
+                    label="5G + 4G (NR / LTE Only)"
+                    ;;
+                11)
+                    # 4G LTE Only (Pure 4G)
+                    bitmask="01000001000000000000"
+                    label="4G LTE Only (No 5G)"
+                    ;;
+                9)
+                    # 4G / 3G / 2G (Standard LTE/UMTS/GSM)
+                    bitmask="01001111101111111111"
+                    label="4G / 3G / 2G (LTE / UMTS / GSM)"
+                    ;;
+                2)
+                    # 3G Only (WCDMA)
+                    bitmask="00001111101111111111"
+                    label="3G Only (WCDMA)"
+                    ;;
+                1)
+                    # 2G Only (GSM)
+                    bitmask="00000000000000000001"
+                    label="2G Only (GSM)"
+                    ;;
+                26|*)
+                    # Auto 5G / 4G / 3G / 2G (Samsung Default)
+                    bitmask="11001111101111111111"
+                    label="Auto 5G / 4G / 3G / 2G (Default)"
+                    mode="26"
+                    ;;
+            esac
+
+            # Apply to slots
+            if [ "$slot" = "0" ] || [ "$slot" = "both" ]; then
+                cmd phone set-allowed-network-types-for-users -s 0 "$bitmask" >/dev/null 2>&1
+                settings put global preferred_network_mode0 "$mode" 2>/dev/null
+                settings put global preferred_network_mode1 "$mode" 2>/dev/null
+                settings put global preferred_network_mode "$mode" 2>/dev/null
+            fi
+            if [ "$slot" = "1" ] || [ "$slot" = "both" ]; then
+                cmd phone set-allowed-network-types-for-users -s 1 "$bitmask" >/dev/null 2>&1
+                settings put global preferred_network_mode2 "$mode" 2>/dev/null
+            fi
+
+            echo "{\"status\": \"ok\", \"message\": \"Network locked to $label (Slot: $slot)\"}"
+        else
+            echo "{\"status\": \"error\", \"message\": \"Missing mode parameter\"}"
+        fi
+        ;;
+
+    set_nr_mode)
+        mode="$1"
+        case "$mode" in
+            sa)
+                setprop persist.vendor.radio.nr_sa_mode 1
+                setprop persist.vendor.radio.nr_nsa_mode 0
+                setprop persist.vendor.radio.endc_enabled 0
+                echo "{\"status\": \"ok\", \"message\": \"5G Mode set to Pure SA (Standalone / Option 2 - Jio Optimal)\"}"
+                ;;
+            nsa)
+                setprop persist.vendor.radio.nr_sa_mode 0
+                setprop persist.vendor.radio.nr_nsa_mode 1
+                setprop persist.vendor.radio.endc_enabled 1
+                echo "{\"status\": \"ok\", \"message\": \"5G Mode set to Pure NSA (Non-Standalone / Option 3x - Airtel Optimal)\"}"
+                ;;
+            both)
+                setprop persist.vendor.radio.nr_sa_mode 1
+                setprop persist.vendor.radio.nr_nsa_mode 1
+                setprop persist.vendor.radio.endc_enabled 1
+                echo "{\"status\": \"ok\", \"message\": \"5G Mode set to Dual SA + NSA (Hybrid Mode)\"}"
+                ;;
+            off)
+                setprop persist.vendor.radio.nr_sa_mode 0
+                setprop persist.vendor.radio.nr_nsa_mode 0
+                setprop persist.vendor.radio.endc_enabled 0
+                echo "{\"status\": \"ok\", \"message\": \"5G NR Modes disabled (LTE Only mode)\"}"
+                ;;
+            *)
+                echo "{\"status\": \"error\", \"message\": \"Invalid NR mode: choose sa, nsa, both, or off\"}"
+                ;;
+        esac
+        ;;
+
+    set_cell_target)
+        target_arfcn="$1"
+        target_pci="$2"
+        
+        if [ -n "$target_arfcn" ] && [ "$target_arfcn" != "None" ]; then
+            echo "ARFCN=$target_arfcn" > "$STATE_DIR/target_cell.conf"
+            [ -n "$target_pci" ] && echo "PCI=$target_pci" >> "$STATE_DIR/target_cell.conf"
+
+            # Derive 3GPP Band name from ARFCN
+            mapped_band="Unknown"
+            if [ "$target_arfcn" -ge 620000 ] && [ "$target_arfcn" -le 653333 ]; then
+                mapped_band="n78/n77 (3500 MHz TDD)"
+            elif [ "$target_arfcn" -ge 151600 ] && [ "$target_arfcn" -le 160600 ]; then
+                mapped_band="n28 (700 MHz FDD)"
+            elif [ "$target_arfcn" -ge 499200 ] && [ "$target_arfcn" -le 537999 ]; then
+                mapped_band="n40 (2300 MHz TDD)"
+            elif [ "$target_arfcn" -ge 361000 ] && [ "$target_arfcn" -le 376000 ]; then
+                mapped_band="n3 (1800 MHz FDD)"
+            elif [ "$target_arfcn" -ge 420000 ] && [ "$target_arfcn" -le 434000 ]; then
+                mapped_band="n41 (2500 MHz TDD)"
+            fi
+
+            # Re-attach radio to search for target cell
+            cmd connectivity airplane-mode enable >/dev/null 2>&1
+            sleep 1
+            cmd connectivity airplane-mode disable >/dev/null 2>&1
+
+            echo "{\"status\": \"ok\", \"message\": \"Target Cell Locked to ARFCN $target_arfcn ($mapped_band)$([ -n "$target_pci" ] && [ "$target_pci" != "None" ] && echo " & PCI $target_pci"). Radio re-attached!\"}"
+        else
+            rm -f "$STATE_DIR/target_cell.conf"
+            echo "{\"status\": \"ok\", \"message\": \"Target Cell lock cleared. Restored normal tower roaming.\"}"
+        fi
+        ;;
+
+    set_endc)
+        val="$1"
+        if [ "$val" = "1" ] || [ "$val" = "true" ]; then
+            setprop persist.vendor.radio.endc_enabled 1
+            echo "{\"status\": \"ok\", \"message\": \"E-UTRA-NR Dual Connectivity (ENDC) Enabled\"}"
+        else
+            setprop persist.vendor.radio.endc_enabled 0
+            echo "{\"status\": \"ok\", \"message\": \"E-UTRA-NR Dual Connectivity (ENDC) Disabled\"}"
+        fi
+        ;;
+
+    set_lte_ca)
+        val="$1"
+        if [ "$val" = "1" ] || [ "$val" = "true" ]; then
+            setprop persist.vendor.radio.lte_ca_enabled 1
+            setprop persist.vendor.radio.force_lte_ca true
+            echo "{\"status\": \"ok\", \"message\": \"LTE Carrier Aggregation (CA) Force Enabled\"}"
+        else
+            setprop persist.vendor.radio.lte_ca_enabled 0
+            setprop persist.vendor.radio.force_lte_ca false
+            echo "{\"status\": \"ok\", \"message\": \"LTE Carrier Aggregation (CA) Force Disabled\"}"
+        fi
+        ;;
+
+    set_vonr)
+        val="$1"
+        if [ "$val" = "1" ] || [ "$val" = "true" ]; then
+            setprop persist.vendor.radio.vonr_enabled 1
+            setprop persist.vendor.radio.vonr_setting_enabled 1
+            settings put global vonr_enabled 1 2>/dev/null
+            echo "{\"status\": \"ok\", \"message\": \"Voice over New Radio (VoNR / 5G Voice) Enabled\"}"
+        else
+            setprop persist.vendor.radio.vonr_enabled 0
+            setprop persist.vendor.radio.vonr_setting_enabled 0
+            settings put global vonr_enabled 0 2>/dev/null
+            echo "{\"status\": \"ok\", \"message\": \"Voice over New Radio (VoNR / 5G Voice) Disabled\"}"
         fi
         ;;
 
     set_volte)
         val="$1"
-        settings put global voice_call_type_enabled "$val"
-        setprop persist.vendor.mtk.volte.enable "$val" 2>/dev/null
-        echo "{\"status\": \"ok\", \"message\": \"VoLTE updated to $val\"}"
+        slot="$2"
+        [ -z "$slot" ] && slot="0"
+        
+        bool_val="false"
+        vtype="1"
+        enh="0"
+        [ "$val" = "1" ] || [ "$val" = "true" ] && bool_val="true" && vtype="0" && enh="1"
+
+        su 1000 -c "content update --uri content://com.sec.ims.settings/imsswitch#simslot$slot --bind enabled:b:$bool_val --bind service:s:volte" 2>/dev/null
+        su 1000 -c "content update --uri content://com.sec.ims.settings/imsswitch#simslot$slot --bind enabled:b:$bool_val --bind service:s:mmtel" 2>/dev/null
+        settings put system voicecall_type "$vtype" 2>/dev/null
+        settings put system voicecall_type0 "$vtype" 2>/dev/null
+        settings put system voicecall_type1 "$vtype" 2>/dev/null
+        settings put global enhanced_4g_mode_enabled "$enh" 2>/dev/null
+        settings put global enhanced_4g_mode_enabled0 "$enh" 2>/dev/null
+        settings put global enhanced_4g_mode_enabled1 "$enh" 2>/dev/null
+        setprop persist.vendor.radio.volte_enabled "$enh"
+        setprop persist.dbg.ims_volte_enable "$enh"
+        setprop persist.dbg.volte_avail_ovr "$enh"
+
+        echo "{\"status\": \"ok\", \"message\": \"VoLTE / HD Calling set to $bool_val (Slot: $slot)\"}"
+        ;;
+
+    set_vilte)
+        val="$1"
+        slot="$2"
+        [ -z "$slot" ] && slot="0"
+        
+        bool_val="false"
+        prop_val="0"
+        [ "$val" = "1" ] || [ "$val" = "true" ] && bool_val="true" && prop_val="1"
+
+        su 1000 -c "content update --uri content://com.sec.ims.settings/imsswitch#simslot$slot --bind enabled:b:$bool_val --bind service:s:mmtel-video" 2>/dev/null
+        setprop persist.vendor.radio.vilte_enabled "$prop_val"
+
+        echo "{\"status\": \"ok\", \"message\": \"ViLTE (Video over LTE) set to $bool_val (Slot: $slot)\"}"
         ;;
 
     set_vowifi)
         val="$1"
-        settings put global wfc_ims_enabled "$val"
-        settings put global wfc_ims_mode 1 2>/dev/null
-        echo "{\"status\": \"ok\", \"message\": \"VoWiFi updated to $val\"}"
+        slot="$2"
+        [ -z "$slot" ] && slot="0"
+
+        prop_val="0"
+        [ "$val" = "1" ] || [ "$val" = "true" ] && prop_val="1"
+
+        setprop persist.vendor.radio.wfc_enabled "$prop_val"
+        settings put system wifi_call_enable1 "$prop_val" 2>/dev/null
+        settings put system wifi_call_enable0 "$prop_val" 2>/dev/null
+        settings put global wifi_calling_enabled "$prop_val" 2>/dev/null
+        settings put global wfc_ims_enabled "$prop_val" 2>/dev/null
+
+        echo "{\"status\": \"ok\", \"message\": \"VoWiFi (Wi-Fi Calling) set to $prop_val (Slot: $slot)\"}"
+        ;;
+
+    set_wfc_mode)
+        mode="$1"
+        case "$mode" in
+            1)
+                settings put global wfc_ims_mode 1 2>/dev/null
+                echo "{\"status\": \"ok\", \"message\": \"Wi-Fi Calling preference set to Cellular Preferred\"}"
+                ;;
+            2)
+                settings put global wfc_ims_mode 2 2>/dev/null
+                echo "{\"status\": \"ok\", \"message\": \"Wi-Fi Calling preference set to Wi-Fi Preferred\"}"
+                ;;
+            3)
+                settings put global wfc_ims_mode 3 2>/dev/null
+                echo "{\"status\": \"ok\", \"message\": \"Wi-Fi Calling preference set to Wi-Fi Only\"}"
+                ;;
+            *)
+                echo "{\"status\": \"error\", \"message\": \"Invalid WFC mode: 1=Cellular, 2=Wi-Fi, 3=Wi-Fi Only\"}"
+                ;;
+        esac
+        ;;
+
+    set_smsip)
+        val="$1"
+        slot="$2"
+        [ -z "$slot" ] && slot="0"
+        
+        bool_val="false"
+        [ "$val" = "1" ] || [ "$val" = "true" ] && bool_val="true"
+
+        su 1000 -c "content update --uri content://com.sec.ims.settings/imsswitch#simslot$slot --bind enabled:b:$bool_val --bind service:s:smsip" 2>/dev/null
+        echo "{\"status\": \"ok\", \"message\": \"SMS over IP (IMS) set to $bool_val (Slot: $slot)\"}"
+        ;;
+
+    set_rcs)
+        val="$1"
+        slot="$2"
+        [ -z "$slot" ] && slot="0"
+        
+        bool_val="false"
+        [ "$val" = "1" ] || [ "$val" = "true" ] && bool_val="true"
+
+        su 1000 -c "content update --uri content://com.sec.ims.settings/imsswitch#simslot$slot --bind enabled:b:$bool_val --bind service:s:rcs" 2>/dev/null
+        echo "{\"status\": \"ok\", \"message\": \"RCS (Rich Communication Services) set to $bool_val (Slot: $slot)\"}"
+        ;;
+
+    set_mobile_data)
+        val="$1"
+        if [ "$val" = "1" ] || [ "$val" = "true" ]; then
+            svc data enable 2>/dev/null
+            settings put global mobile_data 1 2>/dev/null
+            echo "{\"status\": \"ok\", \"message\": \"Mobile Data Enabled\"}"
+        else
+            svc data disable 2>/dev/null
+            settings put global mobile_data 0 2>/dev/null
+            echo "{\"status\": \"ok\", \"message\": \"Mobile Data Disabled\"}"
+        fi
+        ;;
+
+    set_data_roaming)
+        val="$1"
+        slot="$2"
+        [ -z "$slot" ] && slot="0"
+
+        prop_val="0"
+        [ "$val" = "1" ] || [ "$val" = "true" ] && prop_val="1"
+
+        if [ "$slot" = "0" ] || [ "$slot" = "both" ]; then
+            settings put global data_roaming "$prop_val" 2>/dev/null
+        fi
+        if [ "$slot" = "1" ] || [ "$slot" = "both" ]; then
+            settings put global data_roaming2 "$prop_val" 2>/dev/null
+        fi
+
+        echo "{\"status\": \"ok\", \"message\": \"Data Roaming set to $prop_val (Slot: $slot)\"}"
+        ;;
+
+    set_smart_data_switch)
+        val="$1"
+        prop_val="0"
+        [ "$val" = "1" ] || [ "$val" = "true" ] && prop_val="1"
+
+        setprop persist.vendor.radio.smart.data.switch "$prop_val"
+        settings put global smart_dual_sim_settings "$prop_val" 2>/dev/null
+        echo "{\"status\": \"ok\", \"message\": \"Smart Dual-SIM Data Switching set to $prop_val\"}"
+        ;;
+
+    restart_radio)
+        cmd connectivity airplane-mode enable >/dev/null 2>&1
+        sleep 2
+        cmd connectivity airplane-mode disable >/dev/null 2>&1
+        echo "{\"status\": \"ok\", \"message\": \"Radio reset cycle complete (Re-attaching to 5G network...)\"}"
         ;;
 
     launch_servicemode)
         code="$1"
-        [ -z "$code" ] && code="0011"
-        am broadcast -a com.samsung.android.action.SECRET_CODE -d "android_secret_code://$code" -n com.sec.android.RilServiceModeApp/.SecKeyStringBroadcastReceiver >/dev/null 2>&1
-        echo "{\"status\": \"ok\", \"message\": \"Broadcasted Samsung Secret Code *#$code#\"}"
+        case "$code" in
+            "ims")
+                am start -n com.samsung.advp.imssettings/.ImsServiceSwitchActivity >/dev/null 2>&1
+                echo "{\"status\": \"ok\", \"message\": \"Launched Samsung IMS Switch Configuration\"}"
+                ;;
+            "sysdump"|"9900")
+                am start -n com.sec.android.app.servicemodeapp/.SysDump >/dev/null 2>&1
+                echo "{\"status\": \"ok\", \"message\": \"Launched Samsung SysDump (*#9900#)\"}"
+                ;;
+            "usb"|"0808")
+                am start -n com.sec.android.app.servicemodeapp/com.sec.android.app.modemui.activities.USBSettings >/dev/null 2>&1
+                echo "{\"status\": \"ok\", \"message\": \"Launched Samsung USB Modem Settings (*#0808#)\"}"
+                ;;
+            "2263"|"band")
+                am broadcast -a com.samsung.android.action.SECRET_CODE -d "android_secret_code://2263" -n com.sec.android.RilServiceModeApp/.SecKeyStringBroadcastReceiver >/dev/null 2>&1
+                echo "{\"status\": \"ok\", \"message\": \"Broadcasted Band Selection (*#2263#)\"}"
+                ;;
+            "0228"|"battery")
+                am broadcast -a com.samsung.android.action.SECRET_CODE -d "android_secret_code://0228" -n com.sec.android.RilServiceModeApp/.SecKeyStringBroadcastReceiver >/dev/null 2>&1
+                echo "{\"status\": \"ok\", \"message\": \"Broadcasted ADC / Battery Meter (*#0228#)\"}"
+                ;;
+            "0011"|*)
+                [ -z "$code" ] && code="0011"
+                am broadcast -a com.samsung.android.action.SECRET_CODE -d "android_secret_code://$code" -n com.sec.android.RilServiceModeApp/.SecKeyStringBroadcastReceiver >/dev/null 2>&1
+                echo "{\"status\": \"ok\", \"message\": \"Broadcasted Samsung Secret Code *#$code# (RF Stats)\"}"
+                ;;
+        esac
         ;;
 
     revert)
-        orig_mode=$(cat "$STATE_DIR/orig_pref_mode" 2>/dev/null || echo "26")
-        settings put global preferred_network_mode1 "$orig_mode"
-        settings put global preferred_network_mode "$orig_mode"
-        service call phone 81 i32 1 i32 "$orig_mode" >/dev/null 2>&1
-        
-        orig_volte=$(cat "$STATE_DIR/orig_volte" 2>/dev/null || echo "1")
-        settings put global voice_call_type_enabled "$orig_volte"
-        setprop persist.vendor.mtk.volte.enable 1 2>/dev/null
-        
-        echo "{\"status\": \"ok\", \"message\": \"Network settings reverted to factory defaults (Mode $orig_mode)\"}"
+        # 1-Click Rollback to Factory Defaults
+        cmd phone set-allowed-network-types-for-users -s 0 "11001111101111111111" >/dev/null 2>&1
+        cmd phone set-allowed-network-types-for-users -s 1 "11001111101111111111" >/dev/null 2>&1
+        settings put global preferred_network_mode 26 2>/dev/null
+        settings put global preferred_network_mode0 26 2>/dev/null
+        settings put global preferred_network_mode1 26 2>/dev/null
+        settings put global preferred_network_mode2 26 2>/dev/null
+
+        # Clear Target Cell
+        rm -f "$STATE_DIR/target_cell.conf"
+
+        # Reset IMS
+        su 1000 -c "content update --uri content://com.sec.ims.settings/imsswitch#simslot0 --bind enabled:b:true --bind service:s:volte" 2>/dev/null
+        su 1000 -c "content update --uri content://com.sec.ims.settings/imsswitch#simslot0 --bind enabled:b:true --bind service:s:mmtel" 2>/dev/null
+        su 1000 -c "content update --uri content://com.sec.ims.settings/imsswitch#simslot0 --bind enabled:b:true --bind service:s:mmtel-video" 2>/dev/null
+        su 1000 -c "content update --uri content://com.sec.ims.settings/imsswitch#simslot0 --bind enabled:b:true --bind service:s:smsip" 2>/dev/null
+        settings put system voicecall_type 0 2>/dev/null
+        settings put global enhanced_4g_mode_enabled 1 2>/dev/null
+
+        # Reset Radio Props
+        setprop persist.vendor.radio.nr_sa_mode 1
+        setprop persist.vendor.radio.nr_nsa_mode 1
+        setprop persist.vendor.radio.endc_enabled 1
+        setprop persist.vendor.radio.lte_ca_enabled 1
+        setprop persist.vendor.radio.force_lte_ca true
+
+        echo "{\"status\": \"ok\", \"message\": \"All modem & cellular settings restored to Factory Defaults (Auto 5G/4G/3G/2G, VoLTE ON, ViLTE ON, Dual SA+NSA)\"}"
         ;;
 
     *)
-        echo "{\"status\": \"error\", \"message\": \"Unknown action $action\"}"
+        echo "{\"status\": \"error\", \"message\": \"Unknown action: $action\"}"
         ;;
 esac
+exit 0

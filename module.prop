@@ -1,6 +1,6 @@
 id=galaxy-modem-master
 name=Galaxy 5G Modem & Band Master
-version=v1.0
-versionCode=100
-author=vishalhoc & Antigravity
-description=Live 5G/4G carrier band telemetry, hardware supported band viewer, network mode lock, VoLTE/VoWiFi controller, and Samsung ServiceMode launcher for Galaxy M32 5G (MT6853).
+version=v2.0
+versionCode=200
+author=hoc
+description=Ultimate MediaTek Dimensity 720 (MT6853) Cellular & 5G Modem Suite: Live RF Telemetry, Band Locker, 5G SA/NSA Architecture, Samsung IMS Engine (VoLTE, ViLTE, VoNR, VoWiFi), Carrier Aggregation, and Samsung ServiceMode Launcher with Web UI.

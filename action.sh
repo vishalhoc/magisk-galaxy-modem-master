@@ -1,10 +1,12 @@
 #!/system/bin/sh
 # Magisk Action Button Handler for Galaxy 5G Modem & Band Master
+# Author: hoc
 MODDIR=${0%/*}
 
 echo "=========================================="
 echo "  📡 Galaxy 5G Modem & Band Master"
 echo "  Samsung Galaxy M32 5G (MT6853)"
+echo "  Author: hoc"
 echo "=========================================="
 echo ""
 
