@@ -169,7 +169,18 @@ case "$action" in
         sds_val=$(getprop persist.vendor.radio.smart.data.switch 2>/dev/null || echo "1")
         [ "$sds_val" = "1" ] && smart_data_switch="true" || smart_data_switch="false"
 
-        # Target Cell Lock Configuration
+        # Tracking Area Code (TAC) & New Radio Cell Identity (NCI)
+        tac=$(echo "$DUMP" | grep -m 1 "mTac = " | sed -E 's/.*mTac = ([^ ,}]+).*/\1/')
+        [ -z "$tac" ] || [ "$tac" = "2147483647" ] && tac="N/A"
+
+        nci=$(echo "$DUMP" | grep -m 1 "mNci = " | sed -E 's/.*mNci = ([^ ,}]+).*/\1/')
+        [ -z "$nci" ] || [ "$nci" = "0" ] && nci="N/A"
+
+        # Carrier Aggregation State
+        is_ca=$(echo "$DUMP" | grep -m 1 "isUsingCarrierAggregation=" | sed -E 's/.*isUsingCarrierAggregation=([^,}]+).*/\1/')
+        [ "$is_ca" = "true" ] && is_ca_active="true" || is_ca_active="false"
+
+        # Target Cell Lock Configuration (Single & Multiple Whitelist)
         target_arfcn=""
         target_pci=""
         if [ -f "$STATE_DIR/target_cell.conf" ]; then
@@ -180,11 +191,37 @@ case "$action" in
         [ -z "$target_pci" ] && target_pci="None"
 
         cell_locked="false"
+        cell_lock_label=""
         if [ "$target_arfcn" != "None" ] && [ "$target_arfcn" = "$arfcn" ]; then
             if [ "$target_pci" = "None" ] || [ "$target_pci" = "$pci" ]; then
                 cell_locked="true"
+                cell_lock_label="Target ARFCN $target_arfcn"
             fi
         fi
+
+        # Multiple Target Cells list from target_cells.conf
+        target_cells_json=""
+        if [ -f "$STATE_DIR/target_cells.conf" ]; then
+            first_tc=1
+            while IFS=',' read -r t_arfcn t_pci t_lbl || [ -n "$t_arfcn" ]; do
+                [ -z "$t_arfcn" ] && continue
+                t_lbl=$(echo "$t_lbl" | tr -d '\r\n')
+                [ -z "$t_lbl" ] && t_lbl="ARFCN $t_arfcn PCI ${t_pci:-Any}"
+                [ $first_tc -eq 0 ] && target_cells_json="$target_cells_json, "
+                first_tc=0
+                target_cells_json="$target_cells_json{\"arfcn\": \"$t_arfcn\", \"pci\": \"$t_pci\", \"label\": \"$t_lbl\"}"
+                
+                # Check active match
+                if [ "$t_arfcn" = "$arfcn" ]; then
+                    if [ -z "$t_pci" ] || [ "$t_pci" = "None" ] || [ "$t_pci" = "$pci" ]; then
+                        cell_locked="true"
+                        cell_lock_label="$t_lbl"
+                    fi
+                fi
+            done < "$STATE_DIR/target_cells.conf"
+        fi
+        [ -z "$cell_lock_label" ] && [ "$cell_locked" = "true" ] && cell_lock_label="Target Sector Locked"
+        [ -z "$cell_lock_label" ] && cell_lock_label="Auto Roaming"
 
         # Multi-Band Lock Configuration
         locked_bands=""
@@ -200,6 +237,25 @@ case "$action" in
         sim1_state=$(echo "$sim_states" | cut -d ',' -f 1)
         sim2_state=$(echo "$sim_states" | cut -d ',' -f 2)
         [ -z "$sim2_state" ] && sim2_state="ABSENT"
+
+        # Kernel Network Stack Parameters
+        tcp_cong=$(cat /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null || echo "cubic")
+        tcp_avail=$(cat /proc/sys/net/ipv4/tcp_available_congestion_control 2>/dev/null || echo "cubic reno bic")
+        tcp_ws=$(cat /proc/sys/net/ipv4/tcp_window_scaling 2>/dev/null || echo "1")
+        tcp_fo=$(cat /proc/sys/net/ipv4/tcp_fastopen 2>/dev/null || echo "3")
+        ip_fwd=$(cat /proc/sys/net/ipv4/ip_forward 2>/dev/null || echo "1")
+        rmnet0_mtu=$(cat /sys/class/net/rmnet0/mtu 2>/dev/null || echo "1400")
+
+        # Vendor Radio Firmware Props
+        nr_256qam=$(getprop persist.vendor.radio.nr_256qam 2>/dev/null || echo "1")
+        nr_ul_mimo=$(getprop persist.vendor.radio.nr_ul_mimo 2>/dev/null || echo "1")
+        nr_ul_rank=$(getprop persist.vendor.radio.nr_ul_rank 2>/dev/null || echo "2")
+        nr_beam_mgmt=$(getprop persist.vendor.radio.nr_beam_management 2>/dev/null || echo "1")
+        nr_rx_div=$(getprop persist.vendor.radio.nr_rx_diversity 2>/dev/null || echo "1")
+        nr_dl_4rx=$(getprop persist.vendor.radio.nr_dl_4rx 2>/dev/null || echo "1")
+        nr_cdrx=$(getprop persist.vendor.radio.nr_cdrx_enable 2>/dev/null || echo "1")
+        nr_ca_max=$(getprop persist.vendor.radio.nr_ca_max_component 2>/dev/null || echo "2")
+        lte_ca_max=$(getprop persist.vendor.radio.lte_ca_max_component 2>/dev/null || echo "4")
 
         # Hardware & Firmware Info
         baseband=$(getprop gsm.version.baseband 2>/dev/null | cut -d ',' -f 1)
@@ -221,6 +277,9 @@ case "$action" in
   "signal_level": $level,
   "duplex_mode": "$duplex_mode",
   "plmn": "$plmn",
+  "tac": "$tac",
+  "nci": "$nci",
+  "is_ca_active": $is_ca_active,
   "ip_v4": "$ip_v4",
   "ip_v6": "$ip_v6",
   "preferred_mode": "$pref_mode",
@@ -243,6 +302,8 @@ case "$action" in
   "target_arfcn": "$target_arfcn",
   "target_pci": "$target_pci",
   "cell_locked": $cell_locked,
+  "cell_lock_label": "$cell_lock_label",
+  "target_cells": [ $target_cells_json ],
   "locked_bands": "$locked_bands",
   "band_lock_active": $band_lock_active,
   "sim1_state": "$sim1_state",
@@ -251,6 +312,32 @@ case "$action" in
   "ril_ver": "$ril_ver",
   "modem_board": "$modem_board",
   "product_code": "$product_code",
+  "kernel_tweaks": {
+    "tcp_congestion": "$tcp_cong",
+    "tcp_available": "$tcp_avail",
+    "tcp_window_scaling": $tcp_ws,
+    "tcp_fastopen": $tcp_fo,
+    "ip_forward": $ip_fwd,
+    "rmnet0_mtu": $rmnet0_mtu
+  },
+  "radio_tweaks": {
+    "nr_256qam": $nr_256qam,
+    "nr_ul_mimo": $nr_ul_mimo,
+    "nr_ul_rank": $nr_ul_rank,
+    "nr_beam_management": $nr_beam_mgmt,
+    "nr_rx_diversity": $nr_rx_div,
+    "nr_dl_4rx": $nr_dl_4rx,
+    "nr_cdrx_enable": $nr_cdrx,
+    "nr_ca_max_component": $nr_ca_max,
+    "lte_ca_max_component": $lte_ca_max
+  },
+  "pcc": {
+    "band": "$band",
+    "bandwidth_mhz": $bw_mhz,
+    "arfcn": $arfcn,
+    "pci": "$pci",
+    "status": "Primary Serving"
+  },
   "supported_5g": ["n1", "n3", "n5", "n7", "n8", "n20", "n28", "n38", "n40", "n41", "n77", "n78"],
   "supported_4g": ["B1", "B2", "B3", "B4", "B5", "B7", "B8", "B12", "B17", "B20", "B26", "B28", "B38", "B40", "B41", "B66"]
 }
@@ -384,6 +471,99 @@ EOF
         else
             rm -f "$STATE_DIR/target_cell.conf"
             echo "{\"status\": \"ok\", \"message\": \"Target Cell lock cleared. Restored normal tower roaming.\"}"
+        fi
+        ;;
+
+    add_target_cell)
+        t_arfcn="$1"
+        t_pci="$2"
+        t_label="$3"
+        [ -z "$t_label" ] && t_label="Target ARFCN $t_arfcn"
+        if [ -n "$t_arfcn" ] && [ "$t_arfcn" != "None" ]; then
+            clean_label=$(echo "$t_label" | tr ',' ' ')
+            echo "$t_arfcn,$t_pci,$clean_label" >> "$STATE_DIR/target_cells.conf"
+            sort -u "$STATE_DIR/target_cells.conf" -o "$STATE_DIR/target_cells.conf" 2>/dev/null
+            echo "ARFCN=$t_arfcn" > "$STATE_DIR/target_cell.conf"
+            [ -n "$t_pci" ] && echo "PCI=$t_pci" >> "$STATE_DIR/target_cell.conf"
+            echo "{\"status\": \"ok\", \"message\": \"Added Target Cell: ARFCN $t_arfcn PCI ${t_pci:-Any} ($clean_label)\"}"
+        else
+            echo "{\"status\": \"error\", \"message\": \"Missing ARFCN parameter\"}"
+        fi
+        ;;
+
+    remove_target_cell)
+        t_arfcn="$1"
+        t_pci="$2"
+        if [ -f "$STATE_DIR/target_cells.conf" ]; then
+            if [ -n "$t_pci" ]; then
+                grep -v "^$t_arfcn,$t_pci," "$STATE_DIR/target_cells.conf" > "$STATE_DIR/target_cells.tmp" 2>/dev/null
+            else
+                grep -v "^$t_arfcn," "$STATE_DIR/target_cells.conf" > "$STATE_DIR/target_cells.tmp" 2>/dev/null
+            fi
+            mv "$STATE_DIR/target_cells.tmp" "$STATE_DIR/target_cells.conf" 2>/dev/null
+        fi
+        echo "{\"status\": \"ok\", \"message\": \"Target Cell removed from whitelist\"}"
+        ;;
+
+    clear_target_cells)
+        rm -f "$STATE_DIR/target_cells.conf"
+        rm -f "$STATE_DIR/target_cell.conf"
+        echo "{\"status\": \"ok\", \"message\": \"All Target Cells cleared. Restored normal roaming.\"}"
+        ;;
+
+    apply_target_cells)
+        cmd connectivity airplane-mode enable >/dev/null 2>&1
+        sleep 1
+        cmd connectivity airplane-mode disable >/dev/null 2>&1
+        echo "{\"status\": \"ok\", \"message\": \"Target Cells applied to transceiver. Radio re-attached!\"}"
+        ;;
+
+    set_kernel_tweak)
+        param="$1"
+        val="$2"
+        case "$param" in
+            tcp_congestion)
+                echo "$val" > /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null
+                echo "{\"status\": \"ok\", \"message\": \"TCP Congestion Algorithm set to $val\"}"
+                ;;
+            tcp_window_scaling)
+                echo "$val" > /proc/sys/net/ipv4/tcp_window_scaling 2>/dev/null
+                echo "{\"status\": \"ok\", \"message\": \"TCP Window Scaling set to $val\"}"
+                ;;
+            tcp_fastopen)
+                echo "$val" > /proc/sys/net/ipv4/tcp_fastopen 2>/dev/null
+                echo "{\"status\": \"ok\", \"message\": \"TCP Fast Open set to $val\"}"
+                ;;
+            ip_forward)
+                echo "$val" > /proc/sys/net/ipv4/ip_forward 2>/dev/null
+                echo "{\"status\": \"ok\", \"message\": \"IPv4 IP Forwarding set to $val\"}"
+                ;;
+            mtu)
+                ip link set dev rmnet0 mtu "$val" 2>/dev/null
+                echo "{\"status\": \"ok\", \"message\": \"rmnet0 MTU set to $val\"}"
+                ;;
+            *)
+                echo "{\"status\": \"error\", \"message\": \"Unknown kernel tweak: $param\"}"
+                ;;
+        esac
+        ;;
+
+    set_radio_prop)
+        prop_key="$1"
+        val="$2"
+        if [ -n "$prop_key" ] && [ -n "$val" ]; then
+            case "$prop_key" in
+                persist.*|ro.*|gsm.*|ril.*)
+                    full_prop="$prop_key"
+                    ;;
+                *)
+                    full_prop="persist.vendor.radio.$prop_key"
+                    ;;
+            esac
+            setprop "$full_prop" "$val"
+            echo "{\"status\": \"ok\", \"message\": \"Radio prop $full_prop set to $val\"}"
+        else
+            echo "{\"status\": \"error\", \"message\": \"Missing property key or value\"}"
         fi
         ;;
 

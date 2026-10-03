@@ -19,10 +19,14 @@ get_param() {
 
 ACTION=$(get_param action)
 VAL=$(get_param val)
+[ -z "$VAL" ] && VAL=$(get_param bands)
 SLOT=$(get_param slot)
 CODE=$(get_param code)
 PCI=$(get_param pci)
 ARFCN=$(get_param arfcn)
+LABEL=$(get_param label)
+PARAM=$(get_param param)
+[ -z "$PARAM" ] && PARAM=$(get_param prop)
 
 [ -z "$ACTION" ] && ACTION="status"
 
@@ -88,6 +92,24 @@ case "$ACTION" in
         ;;
     set_cell_target)
         sh "$MM" set_cell_target "$ARFCN" "$PCI"
+        ;;
+    add_target_cell)
+        sh "$MM" add_target_cell "$ARFCN" "$PCI" "$LABEL"
+        ;;
+    remove_target_cell)
+        sh "$MM" remove_target_cell "$ARFCN" "$PCI"
+        ;;
+    clear_target_cells)
+        sh "$MM" clear_target_cells
+        ;;
+    apply_target_cells)
+        sh "$MM" apply_target_cells
+        ;;
+    set_kernel_tweak)
+        sh "$MM" set_kernel_tweak "$PARAM" "$VAL"
+        ;;
+    set_radio_prop)
+        sh "$MM" set_radio_prop "$PARAM" "$VAL"
         ;;
     lock_bands)
         sh "$MM" lock_bands "$VAL" "$SLOT"

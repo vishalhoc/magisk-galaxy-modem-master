@@ -1,6 +1,6 @@
 id=galaxy-modem-master
 name=Galaxy 5G Modem & Band Master
-version=v2.5
-versionCode=250
+version=v3.0
+versionCode=300
 author=hoc
-description=Ultimate MediaTek Dimensity 720 (MT6853) Cellular & 5G Suite: Multi-Band Locker (Lock 2/3/4 Bands & 4G+5G Combos), Carrier Aggregation (CA) & EN-DC Matrix, Live RF Telemetry, Samsung IMS Engine (VoLTE, ViLTE, VoNR, VoWiFi), ServiceMode Launcher & Web UI.
+description=Ultimate MediaTek Dimensity 720 (MT6853) Cellular Suite v3.0: 4-Tab Glassmorphism UI, Cellular-Pro/NSG Diagnostic Dashboard, Multi-ARFCN & Multi-PCI Target Whitelist Locker, 3GPP 4G/5G Band Locking & 2CA/3CA/NR-CA/EN-DC Presets, and Hardware/Kernel/ROM Telephony Parameter Customizer.

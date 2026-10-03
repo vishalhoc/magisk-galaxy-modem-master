@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galaxy 5G Modem & Band Master v2.5 by hoc</title>
+    <title>Galaxy 5G Modem & Band Master v3.0 by hoc</title>
     <style>
         :root {
-            --bg: #090d16;
-            --surface: #111827;
-            --surface-hover: #1b2434;
-            --card-header: #151e2e;
+            --bg: #070b12;
+            --surface: #0f172a;
+            --surface-hover: #17233d;
+            --card-header: #131f37;
             --primary: #3b82f6;
             --primary-hover: #2563eb;
             --accent: #10b981;
@@ -17,74 +17,79 @@
             --danger: #ef4444;
             --purple: #8b5cf6;
             --cyan: #06b6d4;
-            --text: #f9fafb;
-            --text-dim: #9ca3af;
-            --border: #1f2937;
-            --exp-bg: #0c1322;
-            --exp-border: #233554;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: #1e293b;
+            --exp-bg: #09101d;
+            --exp-border: #1e3050;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background: var(--bg); color: var(--text); padding: 1.25rem; line-height: 1.5; -webkit-font-smoothing: antialiased; }
-        .container { max-width: 1150px; margin: 0 auto; }
+        body { background: var(--bg); color: var(--text); padding: 1rem; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+        .container { max-width: 1200px; margin: 0 auto; }
         
         /* Header */
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 1.2rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
-        .title-box h1 { font-size: 1.65rem; color: #fff; font-weight: 700; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-        .author-tag { font-size: 0.75rem; background: #1e1b4b; color: #c7d2fe; border: 1px solid #6366f1; padding: 0.2rem 0.6rem; border-radius: 999px; font-weight: 600; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem; }
+        .title-box h1 { font-size: 1.55rem; color: #fff; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+        .author-tag { font-size: 0.72rem; background: #1e1b4b; color: #c7d2fe; border: 1px solid #6366f1; padding: 0.2rem 0.55rem; border-radius: 999px; font-weight: 600; }
         .badge { background: #1f2937; color: #60a5fa; font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 999px; border: 1px solid #3b82f6; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem; }
         .badge.nr { background: #064e3b; color: #34d399; border-color: #10b981; }
         .badge.nsa { background: #1e3a8a; color: #93c5fd; border-color: #3b82f6; }
         .badge.locked { background: #78350f; color: #fde68a; border-color: #d97706; }
         .badge.active { background: #065f46; color: #a7f3d0; border-color: #10b981; }
-        .subtitle { color: var(--text-dim); font-size: 0.88rem; margin-top: 0.35rem; }
+        .subtitle { color: var(--text-dim); font-size: 0.84rem; margin-top: 0.25rem; }
+        
+        /* Tabs Navigation */
+        .tabs-nav { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; overflow-x: auto; padding-bottom: 0.3rem; border-bottom: 1px solid var(--border); }
+        .tab-btn { background: #111c30; border: 1px solid var(--border); color: var(--text-dim); padding: 0.65rem 1.15rem; border-radius: 10px; cursor: pointer; font-size: 0.88rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.45rem; transition: all 0.2s; white-space: nowrap; user-select: none; }
+        .tab-btn:hover { background: var(--surface-hover); color: #fff; border-color: var(--primary); }
+        .tab-btn.active { background: #1e3a8a; color: #93c5fd; border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.35); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.22s ease; }
         
         /* Grid Layout */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.15rem; margin-bottom: 1.25rem; }
         .grid-full { grid-column: 1 / -1; }
         
         /* Cards */
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.35rem; display: flex; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-weight: 600; font-size: 1.08rem; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.6rem; }
-        .stat-row { display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.9rem; align-items: center; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; display: flex; flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.9rem; font-weight: 600; font-size: 1.05rem; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.55rem; }
+        .stat-row { display: flex; justify-content: space-between; padding: 0.42rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.88rem; align-items: center; }
         .stat-row:last-child { border-bottom: none; }
         .stat-label { color: var(--text-dim); }
         .stat-val { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
         
         /* Signal Meters */
-        .meter-container { margin: 0.65rem 0; }
-        .meter-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem; }
-        .meter-bar { width: 100%; height: 9px; background: #1f2937; border-radius: 6px; overflow: hidden; }
+        .meter-container { margin: 0.55rem 0; }
+        .meter-header { display: flex; justify-content: space-between; font-size: 0.83rem; margin-bottom: 0.25rem; }
+        .meter-bar { width: 100%; height: 9px; background: #1e293b; border-radius: 6px; overflow: hidden; }
         .meter-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.4s ease; border-radius: 6px; }
         .meter-fill.warn { background: var(--warning); }
         .meter-fill.bad { background: var(--danger); }
         
-        /* Band Chips */
-        .bands-grid { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.6rem; }
-        .band-chip { background: #1f2937; color: #d1d5db; padding: 0.35rem 0.75rem; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: 1px solid #374151; font-family: ui-monospace, monospace; display: flex; flex-direction: column; align-items: center; min-width: 68px; }
-        .band-chip .band-sub { font-size: 0.65rem; color: var(--text-dim); margin-top: 2px; }
-        .band-chip.active { background: #065f46; color: #a7f3d0; border-color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.45); transform: translateY(-2px); }
-        .band-chip.active .band-sub { color: #d1fae5; font-weight: 700; }
-
-        /* Multi-Band Grid & Checkbox Chips */
+        /* Multi-Band Grid & Chips */
         .multiband-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.55rem; }
-        .multiband-chip { background: #131d2e; border: 1px solid #233554; border-radius: 8px; padding: 0.5rem 0.65rem; display: flex; align-items: center; gap: 0.55rem; cursor: pointer; user-select: none; transition: all 0.2s; }
+        .multiband-chip { background: #131d2e; border: 1px solid #233554; border-radius: 8px; padding: 0.45rem 0.6rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; transition: all 0.2s; }
         .multiband-chip:hover { background: #1a273e; border-color: #3b82f6; transform: translateY(-1px); }
         .multiband-chip.selected { background: #064e3b; border-color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.35); }
-        .multiband-chip input[type="checkbox"] { width: 17px; height: 17px; accent-color: #10b981; cursor: pointer; flex-shrink: 0; }
+        .multiband-chip input[type="checkbox"] { width: 16px; height: 16px; accent-color: #10b981; cursor: pointer; flex-shrink: 0; }
         .multiband-info { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
-        .multiband-name { font-weight: 700; font-size: 0.9rem; color: #fff; font-family: ui-monospace, monospace; }
+        .multiband-name { font-weight: 700; font-size: 0.88rem; color: #fff; font-family: ui-monospace, monospace; }
         .multiband-chip.selected .multiband-name { color: #a7f3d0; }
-        .multiband-sub { font-size: 0.68rem; color: var(--text-dim); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .multiband-sub { font-size: 0.66rem; color: var(--text-dim); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .multiband-chip.selected .multiband-sub { color: #d1fae5; }
 
+        /* Target Cells List */
+        .target-cell-item { background: #131e33; border: 1px solid #223554; border-radius: 8px; padding: 0.6rem 0.85rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.86rem; }
+        .target-cell-item.active-match { border-color: #10b981; background: #064e3b33; box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+
         /* Carrier Table */
-        .carrier-table { width: 100%; border-collapse: collapse; margin-top: 0.8rem; font-size: 0.86rem; }
-        .carrier-table th { background: #151e2e; color: #94a3b8; text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); }
-        .carrier-table td { padding: 0.65rem 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .carrier-table { width: 100%; border-collapse: collapse; margin-top: 0.8rem; font-size: 0.85rem; }
+        .carrier-table th { background: #131f37; color: #94a3b8; text-align: left; padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border); }
+        .carrier-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .carrier-table tr:hover { background: rgba(255,255,255,0.02); }
         
         /* Interactive Controls */
-        .btn { background: var(--primary); color: #fff; border: none; padding: 0.55rem 1.1rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.88rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; text-decoration: none; }
+        .btn { background: var(--primary); color: #fff; border: none; padding: 0.52rem 1.05rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.86rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; text-decoration: none; }
         .btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
         .btn:active { transform: translateY(0); }
         .btn-danger { background: var(--danger); }
@@ -97,46 +102,46 @@
         .btn-cyan:hover { background: #0891b2; color: #fff; }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
         .btn-outline:hover { background: var(--surface-hover); border-color: #374151; }
-        .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.8rem; border-radius: 6px; }
+        .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.78rem; border-radius: 6px; }
         
-        select, input[type="text"], input[type="number"] { background: #0b0f19; border: 1px solid var(--border); color: #fff; padding: 0.55rem 0.8rem; border-radius: 8px; font-size: 0.9rem; outline: none; width: 100%; transition: border-color 0.2s; }
+        select, input[type="text"], input[type="number"] { background: #090e1a; border: 1px solid var(--border); color: #fff; padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.88rem; outline: none; width: 100%; transition: border-color 0.2s; }
         select:focus, input[type="text"]:focus, input[type="number"]:focus { border-color: var(--primary); }
         
-        .toggle-group { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .toggle-group { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .toggle-group:last-child { border-bottom: none; }
-        .toggle-info { flex: 1; padding-right: 1rem; }
-        .toggle-title { font-weight: 600; font-size: 0.92rem; color: #f3f4f6; }
-        .toggle-desc { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
+        .toggle-info { flex: 1; padding-right: 0.8rem; }
+        .toggle-title { font-weight: 600; font-size: 0.9rem; color: #f3f4f6; }
+        .toggle-desc { font-size: 0.76rem; color: var(--text-dim); margin-top: 1px; }
         
-        .switch { position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .25s; border-radius: 26px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .25s; border-radius: 50%; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .25s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .25s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(20px); }
         
         /* Explanation Boxes */
-        .exp-box { background: var(--exp-bg); border: 1px solid var(--exp-border); border-left: 3px solid var(--primary); border-radius: 8px; padding: 0.85rem 1rem; margin-top: 1rem; font-size: 0.83rem; color: #cbd5e1; }
+        .exp-box { background: var(--exp-bg); border: 1px solid var(--exp-border); border-left: 3px solid var(--primary); border-radius: 8px; padding: 0.8rem 0.95rem; margin-top: 0.9rem; font-size: 0.82rem; color: #cbd5e1; }
         .exp-box.accent { border-left-color: var(--accent); }
         .exp-box.warning { border-left-color: var(--warning); }
         .exp-box.purple { border-left-color: var(--purple); }
         .exp-box.cyan { border-left-color: var(--cyan); }
-        .exp-header { font-weight: 700; color: #fff; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem; font-size: 0.86rem; }
-        .exp-row { margin-bottom: 0.35rem; }
+        .exp-header { font-weight: 700; color: #fff; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; }
+        .exp-row { margin-bottom: 0.3rem; }
         .exp-row:last-child { margin-bottom: 0; }
         .exp-key { color: #94a3b8; font-weight: 600; }
-        .exp-code { background: #000; color: #38bdf8; padding: 0.1rem 0.35rem; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.78rem; }
+        .exp-code { background: #000; color: #38bdf8; padding: 0.1rem 0.3rem; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.76rem; }
         
         /* Toast Notification */
-        #toast { position: fixed; bottom: 25px; right: 25px; background: #1e293b; color: #fff; border: 1px solid var(--primary); padding: 0.85rem 1.4rem; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); display: none; z-index: 1000; font-size: 0.9rem; font-weight: 500; animation: fadeIn 0.2s ease; }
+        #toast { position: fixed; bottom: 25px; right: 25px; background: #1e293b; color: #fff; border: 1px solid var(--primary); padding: 0.8rem 1.3rem; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); display: none; z-index: 1000; font-size: 0.88rem; font-weight: 500; animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .slot-selector { display: flex; gap: 0.5rem; margin-top: 0.6rem; margin-bottom: 0.8rem; }
-        .slot-pill { flex: 1; text-align: center; background: #1f2937; color: var(--text-dim); padding: 0.4rem; border-radius: 6px; cursor: pointer; font-size: 0.82rem; font-weight: 600; border: 1px solid #374151; transition: all 0.2s; }
+        .slot-selector { display: flex; gap: 0.45rem; margin-top: 0.5rem; margin-bottom: 0.7rem; }
+        .slot-pill { flex: 1; text-align: center; background: #131e33; color: var(--text-dim); padding: 0.4rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border); transition: all 0.2s; }
         .slot-pill.active { background: #1e3a8a; color: #93c5fd; border-color: #3b82f6; }
 
-        .preset-badge { cursor: pointer; padding: 0.25rem 0.55rem; background: #1e293b; border: 1px solid #334155; border-radius: 6px; font-size: 0.76rem; color: #cbd5e1; font-family: ui-monospace, monospace; }
-        .preset-badge:hover { background: #334155; color: #fff; border-color: #64748b; }
+        .preset-badge { cursor: pointer; padding: 0.25rem 0.55rem; background: #131e33; border: 1px solid #233554; border-radius: 6px; font-size: 0.74rem; color: #cbd5e1; font-family: ui-monospace, monospace; }
+        .preset-badge:hover { background: #1e293b; color: #fff; border-color: #3b82f6; }
     </style>
 </head>
 <body>
@@ -146,621 +151,777 @@
             <div class="title-box">
                 <h1>
                     <span>📡 Galaxy 5G Modem & Band Master</span>
-                    <span class="author-tag">by hoc</span>
+                    <span class="author-tag">v3.0 by hoc</span>
                     <span class="badge nr" id="badge-rat">5G SA</span>
                 </h1>
-                <div class="subtitle">Samsung Galaxy M32 5G (MT6853 Dimensity 720) RF Architecture & Cellular Control Engine</div>
+                <div class="subtitle">Samsung Galaxy M32 5G (MT6853 Dimensity 720) • Comprehensive RF Engineering, Multi-Band & Telephony Suite</div>
             </div>
-            <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
                 <button class="btn btn-outline btn-sm" onclick="loadStatus()">🔄 Refresh Telemetry</button>
                 <button class="btn btn-purple btn-sm" onclick="restartRadio()">⚡ Restart Radio</button>
                 <button class="btn btn-danger btn-sm" onclick="revertDefaults()">⚠️ Revert Stock Defaults</button>
             </div>
         </header>
 
-        <div class="grid">
-            <!-- 1. Live Serving Cell Telemetry -->
-            <div class="card">
-                <div class="card-header">
-                    <span>📡 Live Serving Cell</span>
-                    <span class="badge" id="badge-operator">Loading...</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Active Band</span>
-                    <span class="stat-val" style="color: #34d399; font-size: 1.15rem;" id="val-band">--</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Radio Tech (RAT)</span>
-                    <span class="stat-val" id="val-rat">--</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Frequency (NR-ARFCN)</span>
-                    <span class="stat-val" style="color: #38bdf8;" id="val-arfcn">--</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Physical Cell ID (PCI)</span>
-                    <span class="stat-val" style="color: #facc15;" id="val-pci">--</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Channel Bandwidth</span>
-                    <span class="stat-val" id="val-bw">-- MHz</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Duplex Mode</span>
-                    <span class="stat-val" id="val-duplex">--</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">PLMN (MCC-MNC)</span>
-                    <span class="stat-val" id="val-plmn">--</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Cell Lock Status</span>
-                    <span class="stat-val" id="val-cell-locked">Auto Roaming</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Active IPv4 (CLAT)</span>
-                    <span class="stat-val" id="val-ipv4">--</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Active IPv6 (rmnet0)</span>
-                    <span class="stat-val" id="val-ipv6" style="font-size: 0.74rem; word-break: break-all;">--</span>
+        <!-- Tab Navigation Bar -->
+        <div class="tabs-nav">
+            <div class="tab-btn active" id="tab-btn-dash" onclick="switchTab('dash')">📊 Real-Time Diagnostic Dashboard</div>
+            <div class="tab-btn" id="tab-btn-lock" onclick="switchTab('lock')">🎛️ Cell, ARFCN, PCI & Band Locker</div>
+            <div class="tab-btn" id="tab-btn-tweaks" onclick="switchTab('tweaks')">⚙️ Modem, Kernel & ROM Tweaker</div>
+            <div class="tab-btn" id="tab-btn-tools" onclick="switchTab('tools')">🛠️ Samsung Secret Tools & Spectrum</div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 1: REAL-TIME DIAGNOSTIC DASHBOARD (Cellular Pro / NSG Style) -->
+        <!-- ========================================== -->
+        <div class="tab-content active" id="tab-dash">
+            <div class="grid">
+                <!-- 1. Live Primary Serving Cell (PCC) Cockpit -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>📡 Primary Serving Cell (PCC)</span>
+                        <span class="badge" id="badge-operator">Loading...</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Active Band</span>
+                        <span class="stat-val" style="color: #34d399; font-size: 1.15rem;" id="val-band">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Radio Tech (RAT)</span>
+                        <span class="stat-val" id="val-rat">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Channel Number (ARFCN)</span>
+                        <span class="stat-val" style="color: #38bdf8;" id="val-arfcn">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Physical Cell ID (PCI)</span>
+                        <span class="stat-val" style="color: #facc15;" id="val-pci">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Channel Bandwidth</span>
+                        <span class="stat-val" id="val-bw">-- MHz</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Duplex Mode</span>
+                        <span class="stat-val" id="val-duplex">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Carrier PLMN (MCC-MNC)</span>
+                        <span class="stat-val" id="val-plmn">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Tracking Area Code (TAC)</span>
+                        <span class="stat-val" id="val-tac">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">New Radio Cell ID (NCI)</span>
+                        <span class="stat-val" style="font-size: 0.8rem;" id="val-nci">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Cell Lock Status</span>
+                        <span class="stat-val" id="val-cell-locked">Auto Roaming</span>
+                    </div>
+
+                    <div class="exp-box">
+                        <div class="exp-header">ℹ️ Serving Cell Identification</div>
+                        <div class="exp-row"><span class="exp-key">Physical Cell ID (PCI):</span> Derived from $3 \times SSS + PSS$ identifying the tower sector.</div>
+                        <div class="exp-row"><span class="exp-key">Frequency ARFCN:</span> Absolute Radio Frequency Channel Number representing exact MHz carrier frequency.</div>
+                    </div>
                 </div>
 
-                <!-- Explanation Box -->
-                <div class="exp-box">
-                    <div class="exp-header">ℹ️ What is the Live Serving Cell?</div>
-                    <div class="exp-row"><span class="exp-key">Technical Details:</span> Identifies the physical antenna sector handling your current 5G packet streams.</div>
-                    <div class="exp-row"><span class="exp-key">Underlying API:</span> <span class="exp-code">dumpsys telephony.registry</span> & <span class="exp-code">CellIdentityNr</span>.</div>
-                    <div class="exp-row"><span class="exp-key">Real-World Impact:</span> ARFCN <b>634080</b> corresponds to 3511.2 MHz (Mid-band n78/n77), providing Gigabit speeds with 100 MHz channel bandwidth.</div>
+                <!-- 2. High-Precision RF Signal Quality Meters -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>📶 RF Signal Metrics & Power</span>
+                        <span class="badge" id="badge-level">Bars: --</span>
+                    </div>
+
+                    <!-- RSRP Meter -->
+                    <div class="meter-container">
+                        <div class="meter-header">
+                            <span class="stat-label">SS-RSRP (Signal Received Power)</span>
+                            <span class="stat-val" id="val-rsrp">-- dBm</span>
+                        </div>
+                        <div class="meter-bar"><div class="meter-fill" id="fill-rsrp"></div></div>
+                    </div>
+
+                    <!-- RSRQ Meter -->
+                    <div class="meter-container">
+                        <div class="meter-header">
+                            <span class="stat-label">SS-RSRQ (Signal Received Quality)</span>
+                            <span class="stat-val" id="val-rsrq">-- dB</span>
+                        </div>
+                        <div class="meter-bar"><div class="meter-fill" id="fill-rsrq"></div></div>
+                    </div>
+
+                    <!-- SINR Meter -->
+                    <div class="meter-container">
+                        <div class="meter-header">
+                            <span class="stat-label">SS-SINR (Signal-to-Interference Ratio)</span>
+                            <span class="stat-val" id="val-sinr">-- dB</span>
+                        </div>
+                        <div class="meter-bar"><div class="meter-fill" id="fill-sinr"></div></div>
+                    </div>
+
+                    <div class="stat-row" style="margin-top: 0.5rem;">
+                        <span class="stat-label">Transceiver Hardware</span>
+                        <span class="stat-val" id="val-board">MT6853</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Baseband Firmware</span>
+                        <span class="stat-val" id="val-baseband">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">RIL Version</span>
+                        <span class="stat-val" id="val-ril">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">SIM 1 / SIM 2 State</span>
+                        <span class="stat-val" id="val-sims">--</span>
+                    </div>
+
+                    <div class="exp-box accent">
+                        <div class="exp-header">📶 RF Health Reference</div>
+                        <div class="exp-row"><span class="exp-key">SS-RSRP:</span> > -85 dBm: Excellent | -85 to -105 dBm: Good | < -110 dBm: Weak.</div>
+                        <div class="exp-row"><span class="exp-key">SS-SINR:</span> > 20 dB: Peak 256-QAM Gigabit throughput | < 5 dB: Heavy interference.</div>
+                    </div>
+                </div>
+
+                <!-- 3. Component Carrier Aggregation Matrix -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>⚡ Component Carrier Aggregation (CA)</span>
+                        <span class="badge" id="badge-ca-status">Single Carrier</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Primary Carrier (PCC)</span>
+                        <span class="stat-val" style="color: #38bdf8;" id="val-ca-pcc">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">PCC Channel Bandwidth</span>
+                        <span class="stat-val" id="val-ca-pcc-bw">-- MHz</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Carrier Aggregation Mode</span>
+                        <span class="stat-val" id="val-ca-mode">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Total Bonded Spectrum</span>
+                        <span class="stat-val" style="color: #34d399;" id="val-ca-total-bw">-- MHz</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">LTE CA Force Subsystem</span>
+                        <span class="stat-val" id="val-ca-force">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">EN-DC 4G+5G Subsystem</span>
+                        <span class="stat-val" id="val-ca-endc">--</span>
+                    </div>
+
+                    <div class="exp-box purple">
+                        <div class="exp-header">⚡ Carrier Bonding Details</div>
+                        <div class="exp-row"><span class="exp-key">CA Mechanics:</span> Bonds 1 Primary Carrier (PCC) with up to 3 Secondary Carriers (SCCs) to multiply download speeds. Activation triggers on demand during traffic load.</div>
+                    </div>
+                </div>
+
+                <!-- 4. Data Bearers, IP Interfaces & IMS Telephony -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>🌐 Cellular Bearers & IMS Subsystem</span>
+                        <span class="badge nr" id="badge-ims-state">VoNR Ready</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Active IPv4 (CLAT / rmnet0)</span>
+                        <span class="stat-val" id="val-ipv4">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Active IPv6 (rmnet0)</span>
+                        <span class="stat-val" id="val-ipv6" style="font-size: 0.72rem; word-break: break-all;">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Interface MTU Size</span>
+                        <span class="stat-val" id="val-mtu">1400</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">VoNR (Native 5G Voice)</span>
+                        <span class="stat-val" id="val-vonr-state">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">VoLTE / HD Audio (MMTEL)</span>
+                        <span class="stat-val" id="val-volte-state">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">VoWiFi (Wi-Fi Calling / ePDG)</span>
+                        <span class="stat-val" id="val-vowifi-state">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">SMS over IP (SMS-IP)</span>
+                        <span class="stat-val" id="val-smsip-state">--</span>
+                    </div>
+
+                    <div class="exp-box cyan">
+                        <div class="exp-header">📞 IMS Architecture</div>
+                        <div class="exp-row"><span class="exp-key">VoNR:</span> Dedicated 5G QoS Flow (QCI-1) routing voice packets natively without 4G EPS fallback.</div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- 2. RF Signal Quality Meters -->
-            <div class="card">
+        <!-- ========================================== -->
+        <!-- TAB 2: CELL, ARFCN, PCI & BAND LOCKER -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-lock">
+            <!-- 1. Multi-Target ARFCN & PCI Whitelist Locker -->
+            <div class="card grid-full" style="margin-bottom: 1.25rem;">
                 <div class="card-header">
-                    <span>📶 RF Signal Metrics & Power</span>
-                    <span class="badge" id="badge-level">Bars: --</span>
-                </div>
-
-                <!-- RSRP Meter -->
-                <div class="meter-container">
-                    <div class="meter-header">
-                        <span class="stat-label">SS-RSRP (Signal Received Power)</span>
-                        <span class="stat-val" id="val-rsrp">-- dBm</span>
-                    </div>
-                    <div class="meter-bar"><div class="meter-fill" id="fill-rsrp"></div></div>
-                </div>
-
-                <!-- RSRQ Meter -->
-                <div class="meter-container">
-                    <div class="meter-header">
-                        <span class="stat-label">SS-RSRQ (Signal Received Quality)</span>
-                        <span class="stat-val" id="val-rsrq">-- dB</span>
-                    </div>
-                    <div class="meter-bar"><div class="meter-fill" id="fill-rsrq"></div></div>
-                </div>
-
-                <!-- SINR Meter -->
-                <div class="meter-container">
-                    <div class="meter-header">
-                        <span class="stat-label">SS-SINR (Signal-to-Interference Ratio)</span>
-                        <span class="stat-val" id="val-sinr">-- dB</span>
-                    </div>
-                    <div class="meter-bar"><div class="meter-fill" id="fill-sinr"></div></div>
-                </div>
-
-                <div class="stat-row" style="margin-top: 0.5rem;">
-                    <span class="stat-label">Hardware Transceiver</span>
-                    <span class="stat-val" id="val-board">MT6853</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Baseband Firmware</span>
-                    <span class="stat-val" id="val-baseband">--</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">RIL Implementation</span>
-                    <span class="stat-val" id="val-ril">--</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">SIM 1 / SIM 2 State</span>
-                    <span class="stat-val" id="val-sims">--</span>
-                </div>
-
-                <!-- Explanation Box -->
-                <div class="exp-box accent">
-                    <div class="exp-header">📶 Understanding 5G RF Metrics</div>
-                    <div class="exp-row"><span class="exp-key">SS-RSRP:</span> 5G beam reception power. > -85 dBm: Excellent; -85 to -100 dBm: Good; < -110 dBm causes drops.</div>
-                    <div class="exp-row"><span class="exp-key">SS-SINR:</span> Clarity of signal against interference. > 20 dB delivers peak 256-QAM Gigabit throughput.</div>
-                </div>
-            </div>
-
-            <!-- 3. NR ARFCN & NR PCI Target Locker -->
-            <div class="card grid-full">
-                <div class="card-header">
-                    <span>🎯 NR Frequency ARFCN & Physical Cell ID (PCI) Locker</span>
-                    <span class="badge locked" id="badge-lock-status">Cell Lock: Auto</span>
-                </div>
-                <p style="font-size: 0.84rem; color: var(--text-dim); margin-bottom: 0.8rem;">
-                    Target and lock your device to a specific 5G carrier channel (ARFCN) and physical tower sector (PCI). Prevents handoff to congested towers or lower-frequency bands.
-                </p>
-
-                <!-- Carrier Presets -->
-                <div style="margin-bottom: 0.9rem;">
-                    <div class="stat-label" style="font-size: 0.8rem; margin-bottom: 0.4rem; font-weight: 600;">Indian 5G Channel Quick Presets:</div>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <span class="preset-badge" onclick="fillTargetCell('634080', '155')">⚡ Jio n78 3500MHz (ARFCN 634080 | PCI 155)</span>
-                        <span class="preset-badge" onclick="fillTargetCell('156510', '')">📡 Jio n28 700MHz (ARFCN 156510)</span>
-                        <span class="preset-badge" onclick="fillTargetCell('627264', '')">📶 Airtel n78 3500MHz (ARFCN 627264)</span>
-                        <span class="preset-badge" onclick="fillTargetCell('631000', '')">📶 Airtel n78 Alt (ARFCN 631000)</span>
-                        <span class="preset-badge" onclick="fillTargetCell('361000', '')">📞 Airtel n3 1800MHz (ARFCN 361000)</span>
-                        <span class="preset-badge" onclick="fillTargetCell('623000', '')">🟣 Vi n78 Trial (ARFCN 623000)</span>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; margin-bottom: 0.8rem;">
-                    <div>
-                        <div class="stat-label" style="font-size: 0.8rem; margin-bottom: 0.25rem;">Target NR ARFCN (Channel Number):</div>
-                        <input type="number" id="inp-target-arfcn" placeholder="e.g. 634080 (Band n78)">
-                    </div>
-                    <div>
-                        <div class="stat-label" style="font-size: 0.8rem; margin-bottom: 0.25rem;">Target NR PCI (Physical Cell ID - Optional):</div>
-                        <input type="number" id="inp-target-pci" placeholder="e.g. 155 (0 to 1007)">
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
-                    <button class="btn btn-success" style="flex: 2;" onclick="applyCellLock()">
-                        🔒 Lock Target ARFCN & PCI
-                    </button>
-                    <button class="btn btn-outline" style="flex: 1;" onclick="clearCellLock()">
-                        🔓 Clear Cell Lock
-                    </button>
-                    <button class="btn btn-purple" style="flex: 1;" onclick="launchCode('2263')">
-                        🛠️ Samsung Band Select (*#2263#)
-                    </button>
-                </div>
-
-                <!-- Explanation Box -->
-                <div class="exp-box cyan">
-                    <div class="exp-header">🎯 NR ARFCN & PCI Technical Details</div>
-                    <div class="exp-row"><span class="exp-key">NR ARFCN:</span> Absolute Radio Frequency Channel Number. In 3GPP TS 38.104, <span class="exp-code">ARFCN 634080</span> corresponds precisely to 3511.20 MHz (Mid-Band n78). Locking to this ARFCN forces the modem to prioritize the 100 MHz ultra-wide carrier.</div>
-                    <div class="exp-row"><span class="exp-key">NR PCI:</span> Physical Cell Identity ($0 \le PCI \le 1007$, computed as $3 \times SSS + PSS$). Identifies the exact sector antenna on the cell tower. Locking/targeting a specific PCI stops the modem from ping-ponging between multiple antennas on cell edges, slashing latency jitter.</div>
-                    <div class="exp-row"><span class="exp-key">Hardware Band Select (*#2263#):</span> Launches Samsung's official radio layer menu to select individual NR bands (n78/n28) directly into the modem's non-volatile memory.</div>
-                </div>
-            </div>
-
-            <!-- 3.5. Multi-Band Locker & Carrier Aggregation (CA) Matrix -->
-            <div class="card grid-full" id="card-multiband-locker">
-                <div class="card-header">
-                    <span>🎛️ Multi-Band Locker & Carrier Aggregation (CA) Matrix</span>
-                    <span class="badge" id="badge-multiband-status">Band Lock: Auto (All Bands)</span>
+                    <span>🎯 Multi-Target ARFCN & Physical Cell ID (PCI) Whitelist Locker</span>
+                    <span class="badge" id="badge-lock-status">Cell Lock: Auto</span>
                 </div>
                 <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.8rem;">
-                    Lock any combination of 2, 3, 4, or more bands together across 5G NR and 4G LTE. The MediaTek transceiver strictly whitelists your chosen bands, camps on the best primary cell (PCell), and bonds them simultaneously via <b>Carrier Aggregation (CA)</b> and <b>EN-DC (4G+5G Dual Connectivity)</b>.
+                    <b>Can we lock multiple ARFCN and PCI simultaneously? YES!</b> In 3GPP and MediaTek baseband firmware, cell priority search functions via a <b>Candidate Target Whitelist</b>. You can whitelist multiple carrier frequencies and tower sector PCIs. The modem restricts its attachment strictly to this whitelist, preventing unwanted handovers to distant or congested towers.
                 </p>
 
-                <!-- 1-Tap Carrier Combos & Presets -->
-                <div style="margin-bottom: 1rem;">
-                    <div class="stat-label" style="font-size: 0.82rem; margin-bottom: 0.4rem; font-weight: 600;">⚡ 1-Tap Multi-Band & Aggregation Presets:</div>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <span class="preset-badge" onclick="presetBands(['n78', 'n28', 'B3', 'B5', 'B40'])">🚀 Jio 5G Max Speed (n78 + n28 + B3 + B5 + B40)</span>
-                        <span class="preset-badge" onclick="presetBands(['n78', 'B1', 'B3', 'B8', 'B40'])">⚡ Airtel 5G NSA Aggregation (n78 + B1 + B3 + B8 + B40)</span>
-                        <span class="preset-badge" onclick="presetBands(['n78', 'n28'])">💎 Pure 5G Dual-Band SA (n78 + n28)</span>
-                        <span class="preset-badge" onclick="presetBands(['B1', 'B3', 'B40', 'B41'])">📶 4G LTE 3CA / 4CA (B1 + B3 + B40 + B41)</span>
-                        <span class="preset-badge" onclick="presetBands(['B3', 'B5', 'B40'])">⚡ Jio 4G 3CA (B3 + B5 + B40)</span>
-                        <span class="preset-badge" onclick="selectAllBands()">🌐 Select All Bands</span>
-                        <span class="preset-badge" onclick="deselectAllBands()">🧹 Clear Selection</span>
+                <!-- Currently Whitelisted Targets List -->
+                <div style="margin-bottom: 0.9rem;">
+                    <div class="stat-label" style="font-size: 0.82rem; margin-bottom: 0.4rem; font-weight: 600;">Currently Whitelisted Target Cells:</div>
+                    <div id="target-cells-list-container">
+                        <div style="font-size: 0.84rem; color: var(--text-dim); padding: 0.5rem; background: #0b1220; border-radius: 6px;">
+                            No specific target cells configured (Operating on full auto network roaming).
+                        </div>
                     </div>
                 </div>
 
-                <!-- Active Lock Status Bar -->
+                <!-- Add New Target Cell Form -->
+                <div style="background: #0d1526; border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem; margin-bottom: 0.9rem;">
+                    <div class="stat-label" style="font-size: 0.82rem; margin-bottom: 0.5rem; font-weight: 600; color: #60a5fa;">➕ Add Target Cell to Whitelist:</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem; margin-bottom: 0.6rem;">
+                        <div>
+                            <span class="stat-label" style="font-size: 0.78rem;">Target ARFCN (Channel Number):</span>
+                            <input type="number" id="inp-target-arfcn" placeholder="e.g. 634080 (Band n78)">
+                        </div>
+                        <div>
+                            <span class="stat-label" style="font-size: 0.78rem;">Target PCI (Physical Cell ID):</span>
+                            <input type="number" id="inp-target-pci" placeholder="e.g. 155 (0 to 1007, or leave blank for Any)">
+                        </div>
+                        <div>
+                            <span class="stat-label" style="font-size: 0.78rem;">Custom Sector Label:</span>
+                            <input type="text" id="inp-target-label" placeholder="e.g. Jio n78 Sector 1">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary btn-sm" onclick="addTargetCellFromInput()">➕ Add to Target Whitelist</button>
+                    </div>
+                </div>
+
+                <!-- Multi-Cell Quick Presets -->
+                <div style="margin-bottom: 0.9rem;">
+                    <div class="stat-label" style="font-size: 0.8rem; margin-bottom: 0.35rem; font-weight: 600;">⚡ Multi-Target 1-Tap Presets:</div>
+                    <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+                        <span class="preset-badge" onclick="presetTargetCells([['634080','155','Jio n78 Sector 1'], ['634080','156','Jio n78 Sector 2'], ['634080','158','Jio n78 Sector 3']])">⚡ Jio n78 3-Sector Cluster (634080: 155, 156, 158)</span>
+                        <span class="preset-badge" onclick="presetTargetCells([['634080','155','Jio n78 High-Speed'], ['156510','','Jio n28 Indoor Penetration']])">📡 Jio 5G Dual-Band Priority (n78 634080 + n28 156510)</span>
+                        <span class="preset-badge" onclick="presetTargetCells([['627264','','Airtel n78 Main'], ['631000','','Airtel n78 Alt'], ['361000','','Airtel n3 Mid-Band']])">📶 Airtel 5G Multi-Carrier (n78 627264/631000 + n3 361000)</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-success" style="flex: 2;" onclick="applyTargetCells()">
+                        🔒 Apply Target Cells Whitelist & Cycle Radio
+                    </button>
+                    <button class="btn btn-outline" style="flex: 1;" onclick="clearAllTargetCells()">
+                        🔓 Clear All Target Cell Locks
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Carrier Aggregation & EN-DC Multi-Carrier Presets (User's Exact Combos) -->
+            <div class="card grid-full" style="margin-bottom: 1.25rem;">
+                <div class="card-header">
+                    <span>⚡ Carrier Aggregation (CA) & 4G+5G EN-DC Bonding Presets</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.8rem;">
+                    1-Tap multi-band combinations engineered according to 3GPP specifications and MediaTek MT6853 carrier aggregation matrices.
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.8rem; margin-bottom: 0.8rem;">
+                    <!-- LTE 2CA / 3CA Card -->
+                    <div style="background: #111a2e; border: 1px solid #1e2e4e; border-radius: 8px; padding: 0.85rem;">
+                        <div style="font-weight: 700; color: #60a5fa; font-size: 0.9rem; margin-bottom: 0.35rem;">📶 LTE 2CA / 3CA (4G+ LTE-A)</div>
+                        <div style="font-size: 0.78rem; color: var(--text-dim); margin-bottom: 0.6rem;">Up to 60 MHz (3 carriers). Aggregates 1 PCC with up to 2 SCCs.</div>
+                        <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                            <button class="btn btn-outline btn-sm" onclick="applyPresetBands(['B3', 'B40'], 'LTE 2CA: B3+B40 (40 MHz)')">⚡ B3 + B40 (Jio/Airtel 2CA - 40 MHz)</button>
+                            <button class="btn btn-outline btn-sm" onclick="applyPresetBands(['B1', 'B3', 'B40'], 'LTE 3CA: B1+B3+B40 (60 MHz)')">⚡ B1 + B3 + B40 (Airtel/Vi 3CA - 60 MHz)</button>
+                            <button class="btn btn-outline btn-sm" onclick="applyPresetBands(['B3', 'B40', 'B41'], 'LTE 3CA: B3+B40+B41 (60 MHz)')">⚡ B3 + B40 + B41 (High-Capacity 3CA - 60 MHz)</button>
+                        </div>
+                    </div>
+
+                    <!-- 5G NR-CA Card -->
+                    <div style="background: #09201a; border: 1px solid #134e3e; border-radius: 8px; padding: 0.85rem;">
+                        <div style="font-weight: 700; color: #34d399; font-size: 0.9rem; margin-bottom: 0.35rem;">🚀 5G NR-CA (5G+5G Standalone)</div>
+                        <div style="font-size: 0.78rem; color: var(--text-dim); margin-bottom: 0.6rem;">Up to 110 MHz (2 carriers). Aggregates NR carriers under 5GC.</div>
+                        <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                            <button class="btn btn-outline btn-sm" onclick="applyPresetBands(['n28', 'n78'], '5G NR-CA: n28+n78 (110 MHz)')">💎 n28 + n78 (Jio 5G SA Dual-Band - 110 MHz)</button>
+                            <button class="btn btn-outline btn-sm" onclick="applyPresetBands(['n78'], '5G C-Band: n78 (100 MHz Contiguous)')">💎 n78 + n78 (Ultra-Wide C-Band - 100 MHz)</button>
+                        </div>
+                    </div>
+
+                    <!-- 4G + 5G EN-DC Card -->
+                    <div style="background: #20132b; border: 1px solid #4a216d; border-radius: 8px; padding: 0.85rem;">
+                        <div style="font-weight: 700; color: #c084fc; font-size: 0.9rem; margin-bottom: 0.35rem;">⚡ 4G + 5G EN-DC Dual Connectivity</div>
+                        <div style="font-size: 0.78rem; color: var(--text-dim); margin-bottom: 0.6rem;">Up to 140 MHz aggregate. LTE anchors + 100 MHz 5G carrier.</div>
+                        <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                            <button class="btn btn-outline btn-sm" onclick="applyPresetBands(['B3', 'B40', 'n78'], 'EN-DC: B3[20MHz]+B40[20MHz]+n78[100MHz]')">🚀 B3[20M] + B40[20M] + n78[100M] (140 MHz)</button>
+                            <button class="btn btn-outline btn-sm" onclick="applyPresetBands(['n78', 'n28', 'B3', 'B5', 'B40'], 'Jio 5G Max Speed (n78+n28+B3+B5+B40)')">🚀 Jio 5G Max Speed (n78+n28+B3+B5+B40)</button>
+                            <button class="btn btn-outline btn-sm" onclick="applyPresetBands(['n78', 'B1', 'B3', 'B8', 'B40'], 'Airtel 5G NSA Aggregation (n78+B1+B3+B8+B40)')">🚀 Airtel 5G NSA Aggregation (n78+B1+B3+B8+B40)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Multi-Band Whitelist Grid Locker -->
+            <div class="card grid-full">
+                <div class="card-header">
+                    <span>🎛️ Dedicated 5G NR & 4G LTE Band Whitelist Matrix</span>
+                    <span class="badge" id="badge-multiband-status">Band Lock: Auto</span>
+                </div>
+                
                 <div class="stat-row" style="background: rgba(255,255,255,0.03); padding: 0.6rem 0.8rem; border-radius: 8px; margin-bottom: 1rem;">
                     <span class="stat-label">Currently Whitelisted Bands:</span>
                     <span class="stat-val" style="color: #38bdf8;" id="val-locked-bands">All Certified Bands (Auto Roaming)</span>
                 </div>
 
-                <!-- 5G NR Multi-Select Section -->
+                <!-- 5G NR Bands Section -->
                 <div style="margin-bottom: 1rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                        <span style="font-size: 0.88rem; color: #60a5fa; font-weight: 700;">5G NR Bands (Select to Lock / Aggregate):</span>
+                        <span style="font-size: 0.88rem; color: #60a5fa; font-weight: 700;">5G NR Bands (Select to Whitelist / Aggregate):</span>
                         <span style="font-size: 0.75rem; color: var(--text-dim);" id="count-5g-selected">0 selected</span>
                     </div>
                     <div class="multiband-grid" id="grid-select-5g"></div>
                 </div>
 
-                <!-- 4G LTE Multi-Select Section -->
+                <!-- 4G LTE Bands Section -->
                 <div style="margin-bottom: 1rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                        <span style="font-size: 0.88rem; color: #93c5fd; font-weight: 700;">4G LTE Bands (Select to Lock / Anchor):</span>
+                        <span style="font-size: 0.88rem; color: #93c5fd; font-weight: 700;">4G LTE Bands (Select to Whitelist / Anchor):</span>
                         <span style="font-size: 0.75rem; color: var(--text-dim);" id="count-4g-selected">0 selected</span>
                     </div>
                     <div class="multiband-grid" id="grid-select-4g"></div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.6rem;">
                     <button class="btn btn-success" style="flex: 2;" onclick="applyMultiBandLock()">
-                        🔒 Apply Multi-Band Lock & Cycle Radio
+                        🔒 Apply Selected Multi-Band Whitelist
                     </button>
                     <button class="btn btn-outline" style="flex: 1;" onclick="clearMultiBandLock()">
-                        🔓 Clear Band Lock (Restore All)
+                        🔓 Restore All Certified Bands
                     </button>
                     <button class="btn btn-purple" style="flex: 1;" onclick="launchCode('2263')">
                         🛠️ Samsung Band Select (*#2263#)
                     </button>
                 </div>
 
-                <!-- Deep Technical Explanation Cards -->
-                <div class="exp-box cyan" style="margin-top: 1rem;">
-                    <div class="exp-header">🧠 Deep 3GPP & MediaTek Radio Architecture: Multi-Band Locking Explained</div>
-                    <div class="exp-row"><span class="exp-key">1. Can we lock 2, 3, or 4 bands together?</span> <b>YES.</b> In 3GPP standards (TS 36.331 / TS 38.331), a device connects to one Primary Serving Cell (PCell / PCC) at any given millisecond. However, setting a Multi-Band Whitelist Mask (e.g. B3 + B40 + n78) instructs the transceiver to strictly reject all non-selected bands. The modem will <i>only</i> search, camp, and perform handovers within your chosen subset.</div>
-                    <div class="exp-row"><span class="exp-key">2. Can we lock 4G and 5G bands together?</span> <b>YES — via EN-DC (Option 3x Dual Connectivity).</b> In 5G NSA, the phone connects simultaneously to a 4G LTE anchor (Master Cell Group - MCG, e.g. B3/B40) AND a 5G NR carrier (Secondary Cell Group - SCG, e.g. n78). Selecting both 4G and 5G bands automatically activates EN-DC (<span class="exp-code">persist.vendor.radio.endc_enabled=1</span>) in Mode 28.</div>
-                    <div class="exp-row"><span class="exp-key">3. Can we use 2 or more bands together?</span> <b>YES — via Carrier Aggregation (CA) & Dual Connectivity!</b> Dimensity 720 (MT6853) supports up to 3CC LTE CA (aggregating up to 3 LTE carriers, e.g. B3+B40+B40) and 2CC NR CA. When data flows, the base station activates Secondary Carriers (SCC / SCell), bonding up to 140 MHz of spectrum for multiplied download and upload bandwidth!</div>
-                    <div class="exp-row"><span class="exp-key">Underlying RIL & Vendor Subsystems:</span> Directly programs MediaTek search filter <span class="exp-code">persist.vendor.radio.search_band_filter=1</span>, dynamic band arrays <span class="exp-code">lte_band</span>, <span class="exp-code">nr_band</span>, <span class="exp-code">nr_sa_band</span>, <span class="exp-code">nr_nsa_band</span>, <span class="exp-code">lte_ca_band_combo</span>, and updates Android's Telephony bitmask.</div>
+                <div class="exp-box cyan">
+                    <div class="exp-header">🧠 The 3 Locking Modalities Explained (3GPP Rel-15)</div>
+                    <div class="exp-row"><span class="exp-key">Option A (Band Whitelist):</span> Restricts the transceiver strictly to selected frequency bands, eliminating unwanted handovers to low-speed fallback layers.</div>
+                    <div class="exp-row"><span class="exp-key">Option B (ARFCN Frequency Lock):</span> Binds radio search to exact carrier channels (e.g. ARFCN 634080 for 100 MHz n78).</div>
+                    <div class="exp-row"><span class="exp-key">Option C (PCI Sector Lock):</span> Binds connection to the exact physical tower sector antenna, eliminating latency jitter.</div>
                 </div>
             </div>
+        </div>
 
-            <!-- 4. 5G NR Architecture (SA vs NSA & ENDC) -->
-            <div class="card">
-                <div class="card-header">
-                    <span>🚀 5G NR Architecture (SA vs NSA & ENDC)</span>
-                    <span class="badge" id="badge-nr-mode">SA Active</span>
-                </div>
-                <p style="font-size: 0.83rem; color: var(--text-dim); margin-bottom: 0.6rem;">
-                    Switch between 5G Standalone (Option 2) and Non-Standalone (Option 3x) dual-connectivity architecture.
-                </p>
-
-                <!-- NSA Mode Quick Options -->
-                <div style="display: flex; gap: 0.45rem; margin-bottom: 0.9rem; flex-wrap: wrap;">
-                    <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="setNrArchitecture('sa')">⚡ SA Only (Jio 5G)</button>
-                    <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="setNrArchitecture('nsa')">📶 NSA Only (Airtel 5G)</button>
-                    <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="setNrArchitecture('both')">🔄 Dual SA+NSA</button>
-                    <button class="btn btn-outline btn-sm" style="flex: 1;" onclick="setNrArchitecture('off')">🚫 LTE Only</button>
-                </div>
-
-                <div class="toggle-group">
-                    <div class="toggle-info">
-                        <div class="toggle-title">5G Standalone (SA Mode)</div>
-                        <div class="toggle-desc">Connects directly to pure 5G Next-Gen Core (5GC) without 4G LTE anchor</div>
+        <!-- ========================================== -->
+        <!-- TAB 3: MODEM, KERNEL & ROM LEVEL MASTER TWEAKER -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-tweaks">
+            <div class="grid">
+                <!-- 1. Modem & Transceiver Level Tweaks -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>📻 Modem & Transceiver Level (Radio Firmware)</span>
+                        <span class="badge nr">MediaTek MT6853</span>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="chk-nr-sa" onchange="toggleNrMode()">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+                    <p style="font-size: 0.82rem; color: var(--text-dim); margin-bottom: 0.6rem;">
+                        Granular control over MediaTek baseband firmware parameters and 3GPP radio capabilities.
+                    </p>
 
-                <div class="toggle-group">
-                    <div class="toggle-info">
-                        <div class="toggle-title">5G Non-Standalone (NSA Mode)</div>
-                        <div class="toggle-desc">Connects to 4G LTE EPC core with secondary 5G NR carrier attachment</div>
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <div class="toggle-title">5G Standalone (SA Option 2)</div>
+                            <div class="toggle-desc">Pure Next-Gen 5GC core connection (Jio True5G)</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="tweak-nr-sa" onchange="toggleRadioTweak('nr_sa_mode', this.checked)">
+                            <span class="slider"></span>
+                        </label>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="chk-nr-nsa" onchange="toggleNrMode()">
-                        <span class="slider"></span>
-                    </label>
-                </div>
 
-                <div class="toggle-group">
-                    <div class="toggle-info">
-                        <div class="toggle-title">E-UTRA-NR Dual Connectivity (ENDC)</div>
-                        <div class="toggle-desc">Allows simultaneous transmission across 4G LTE and 5G NR carriers</div>
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <div class="toggle-title">5G Non-Standalone (NSA Option 3x)</div>
+                            <div class="toggle-desc">4G LTE anchor with secondary 5G carrier (Airtel 5G Plus)</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="tweak-nr-nsa" onchange="toggleRadioTweak('nr_nsa_mode', this.checked)">
+                            <span class="slider"></span>
+                        </label>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="chk-endc" onchange="toggleEndc(this.checked)">
-                        <span class="slider"></span>
-                    </label>
+
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <div class="toggle-title">E-UTRA-NR Dual Connectivity (ENDC)</div>
+                            <div class="toggle-desc">Simultaneous multi-radio transmission across LTE & NR</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="tweak-endc" onchange="toggleRadioTweak('endc_enabled', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <div class="toggle-title">Force LTE Carrier Aggregation (CA)</div>
+                            <div class="toggle-desc">Forces modem to request maximum multi-carrier aggregation</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="tweak-lte-ca" onchange="toggleRadioTweak('lte_ca_enabled', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <div class="toggle-title">5G NR 256-QAM Modulation Boost</div>
+                            <div class="toggle-desc">Enables peak 8-bit per symbol constellation for Gigabit DL</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="tweak-256qam" onchange="toggleRadioTweak('nr_256qam', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <div class="toggle-title">5G NR Uplink MIMO & Rank 2</div>
+                            <div class="toggle-desc">2-layer simultaneous uplink spatial multiplexing</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="tweak-ul-mimo" onchange="toggleRadioTweak('nr_ul_mimo', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <div class="toggle-title">5G NR 4Rx Diversity (DL 4Rx)</div>
+                            <div class="toggle-desc">Activates 4-way receiver antenna diversity on MT6853</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="tweak-4rx" onchange="toggleRadioTweak('nr_dl_4rx', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div style="margin-top: 0.6rem;">
+                        <span class="stat-label" style="font-size: 0.78rem;">NR Carrier Aggregation Max Components:</span>
+                        <select id="sel-nr-ca-max" onchange="applyRadioProp('nr_ca_max_component', this.value)">
+                            <option value="1">1 CC (Single Carrier)</option>
+                            <option value="2">2 CC (Dual Carrier Aggregation - Max MT6853)</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-top: 0.5rem;">
+                        <span class="stat-label" style="font-size: 0.78rem;">LTE CA Max Component Carriers:</span>
+                        <select id="sel-lte-ca-max" onchange="applyRadioProp('lte_ca_max_component', this.value)">
+                            <option value="2">2 CC (LTE 2CA)</option>
+                            <option value="3">3 CC (LTE 3CA)</option>
+                            <option value="4">4 CC (LTE 4CA - Maximum)</option>
+                        </select>
+                    </div>
                 </div>
 
-                <!-- Explanation Box -->
-                <div class="exp-box purple">
-                    <div class="exp-header">🚀 5G NSA Mode (Option 3x) Deep Dive</div>
-                    <div class="exp-row"><span class="exp-key">What is 5G NSA?</span> In Non-Standalone (NSA), the phone must attach to a primary 4G LTE anchor carrier (e.g. Band 3 or Band 40) for control signaling, while adding a secondary 5G NR carrier (e.g. Band n78) for high-speed user plane data via <b>ENDC</b>.</div>
-                    <div class="exp-row"><span class="exp-key">Operator Differences:</span> <b>Airtel 5G Plus</b> is purely 5G NSA; it requires NSA & ENDC to function. <b>Reliance Jio</b> is purely 5G SA; it requires SA mode.</div>
-                    <div class="exp-row"><span class="exp-key">Underlying System Props:</span> <span class="exp-code">persist.vendor.radio.nr_sa_mode</span>, <span class="exp-code">nr_nsa_mode</span>, and <span class="exp-code">endc_enabled</span>.</div>
+                <!-- 2. Linux Kernel & IP Network Stack Tweaks -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>🐧 Linux Kernel & IP Network Stack</span>
+                        <span class="badge">Kernel 4.14</span>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-dim); margin-bottom: 0.6rem;">
+                        Tune cellular packet queuing, congestion control algorithms, and socket buffers.
+                    </p>
+
+                    <div style="margin-bottom: 0.8rem;">
+                        <span class="stat-label" style="font-size: 0.8rem;">TCP Congestion Control Algorithm:</span>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                            <select id="sel-tcp-cong" style="flex: 2;">
+                                <option value="cubic">CUBIC (Default high-bandwidth)</option>
+                                <option value="bic">BIC (Aggressive window scaling)</option>
+                                <option value="reno">RENO (Classic loss-based)</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="applyKernelTweak('tcp_congestion', document.getElementById('sel-tcp-cong').value)">Apply</button>
+                        </div>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <div class="toggle-title">TCP Window Scaling (RFC 1323)</div>
+                            <div class="toggle-desc">Expands maximum TCP window size beyond 64KB for high BDP</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="tweak-tcp-ws" onchange="applyKernelTweak('tcp_window_scaling', this.checked ? '1' : '0')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <div class="toggle-title">TCP Fast Open (RFC 7413)</div>
+                            <div class="toggle-desc">Transmits data during the initial SYN handshake (Reduces RTT)</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="tweak-tcp-fo" onchange="applyKernelTweak('tcp_fastopen', this.checked ? '3' : '0')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <div class="toggle-title">IPv4 Packet Forwarding</div>
+                            <div class="toggle-desc">Allows packet routing across Wi-Fi hotspot and cellular (rmnet0)</div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="tweak-ip-fwd" onchange="applyKernelTweak('ip_forward', this.checked ? '1' : '0')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div style="margin-top: 0.8rem;">
+                        <span class="stat-label" style="font-size: 0.8rem;">rmnet0 Cellular Interface MTU Size:</span>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                            <select id="sel-rmnet-mtu" style="flex: 2;">
+                                <option value="1400">1400 (Standard LTE/5G Carrier MTU)</option>
+                                <option value="1420">1420 (Low-overhead 5G MTU)</option>
+                                <option value="1500">1500 (Ethernet Standard MTU)</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="applyKernelTweak('mtu', document.getElementById('sel-rmnet-mtu').value)">Set MTU</button>
+                        </div>
+                    </div>
+
+                    <div class="exp-box warning">
+                        <div class="exp-header">🐧 Kernel Tweaks Impact</div>
+                        <div class="exp-row"><span class="exp-key">TCP Fast Open:</span> Eliminates 1 RTT during TCP connection setup, improving gaming and browsing latency.</div>
+                    </div>
+                </div>
+
+                <!-- 3. Android Framework & OneUI Telephony (ROM Level) -->
+                <div class="card grid-full">
+                    <div class="card-header">
+                        <span>📱 Android Framework & Samsung OneUI Telephony (ROM Level)</span>
+                        <span class="badge">Samsung OneUI 5.0</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                        <div>
+                            <div class="stat-label" style="font-size: 0.82rem; margin-bottom: 0.3rem;">Target SIM Slot:</div>
+                            <div class="slot-selector">
+                                <div class="slot-pill active" id="slot-both" onclick="setTargetSlot('both')">Both SIMs</div>
+                                <div class="slot-pill" id="slot-0" onclick="setTargetSlot('0')">SIM 1 (Slot 0)</div>
+                                <div class="slot-pill" id="slot-1" onclick="setTargetSlot('1')">SIM 2 (Slot 1)</div>
+                            </div>
+
+                            <div class="stat-label" style="font-size: 0.82rem; margin-bottom: 0.3rem;">Desired Preferred Network Mode:</div>
+                            <select id="sel-netmode">
+                                <option value="33">⚡ Mode 33: Force 5G Only (NR Only - Pure Standalone)</option>
+                                <option value="28">🚀 Mode 28: Force 5G + 4G (NR / LTE Only - No 2G/3G)</option>
+                                <option value="11">📶 Mode 11: Force 4G Only (LTE Only)</option>
+                                <option value="9">📞 Mode 9: 4G / 3G / 2G (Standard LTE / WCDMA / GSM)</option>
+                                <option value="2">📻 Mode 2: 3G Only (WCDMA)</option>
+                                <option value="1">📟 Mode 1: 2G Only (GSM)</option>
+                                <option value="26">🔄 Mode 26: Auto 5G / 4G / 3G / 2G (Samsung Default)</option>
+                            </select>
+
+                            <button class="btn btn-success" style="margin-top: 0.6rem; width: 100%;" onclick="applyNetworkMode()">
+                                🔒 Apply Network Mode
+                            </button>
+                        </div>
+
+                        <div>
+                            <div class="toggle-group">
+                                <div class="toggle-info">
+                                    <div class="toggle-title">VoLTE / HD Audio (MMTEL)</div>
+                                    <div class="toggle-desc">Carrier voice over LTE packet bearer</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="chk-volte" onchange="toggleVoLTE(this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="toggle-group">
+                                <div class="toggle-info">
+                                    <div class="toggle-title">ViLTE (Video over LTE)</div>
+                                    <div class="toggle-desc">Carrier native video calling bearer</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="chk-vilte" onchange="toggleViLTE(this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="toggle-group">
+                                <div class="toggle-info">
+                                    <div class="toggle-title">VoWiFi (Wi-Fi Calling / ePDG)</div>
+                                    <div class="toggle-desc">Voice & SMS tunneled through IPsec over Wi-Fi</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="chk-vowifi" onchange="toggleVoWiFi(this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="toggle-group">
+                                <div class="toggle-info">
+                                    <div class="toggle-title">SMS over IP (SMS-IP)</div>
+                                    <div class="toggle-desc">Direct IMS packet messaging without CS fallback</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="chk-smsip" onchange="toggleSmsIp(this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="toggle-group">
+                                <div class="toggle-info">
+                                    <div class="toggle-title">Mobile Data Master</div>
+                                    <div class="toggle-desc">Cellular data connection switch</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="chk-mobile-data" onchange="toggleMobileData(this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="toggle-group">
+                                <div class="toggle-info">
+                                    <div class="toggle-title">Data Roaming</div>
+                                    <div class="toggle-desc">Permit data on national/international roaming</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="chk-roaming" onchange="toggleDataRoaming(this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="toggle-group">
+                                <div class="toggle-info">
+                                    <div class="toggle-title">Smart Dual-SIM Data Switching</div>
+                                    <div class="toggle-desc">Switches data to secondary SIM during calls</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="chk-sds" onchange="toggleSmartDataSwitch(this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div style="margin-top: 0.6rem;">
+                                <span class="stat-label" style="font-size: 0.8rem;">Wi-Fi Calling Preference (WFC Mode):</span>
+                                <select id="sel-wfc-mode" onchange="changeWfcMode(this.value)">
+                                    <option value="1">📶 Cellular Preferred</option>
+                                    <option value="2">🌐 Wi-Fi Preferred</option>
+                                    <option value="3">🔒 Wi-Fi Only</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- 5. Network Mode & RAT Locker -->
-            <div class="card">
-                <div class="card-header">
-                    <span>🔒 Network Mode & RAT Locker</span>
-                    <span class="badge" id="badge-prefmode">Mode --</span>
-                </div>
-                <p style="font-size: 0.83rem; color: var(--text-dim); margin-bottom: 0.6rem;">
-                    Lock cellular modem to specific radio generation. Prevents unwanted fallback to 4G/3G/2G in fringe areas.
-                </p>
-
-                <div class="stat-label" style="font-size: 0.8rem; margin-bottom: 0.2rem;">Target SIM Slot:</div>
-                <div class="slot-selector">
-                    <div class="slot-pill active" id="slot-both" onclick="setTargetSlot('both')">Both SIMs</div>
-                    <div class="slot-pill" id="slot-0" onclick="setTargetSlot('0')">SIM 1 (Slot 0)</div>
-                    <div class="slot-pill" id="slot-1" onclick="setTargetSlot('1')">SIM 2 (Slot 1)</div>
-                </div>
-
-                <div class="stat-label" style="font-size: 0.8rem; margin-bottom: 0.3rem;">Desired Network Mode:</div>
-                <select id="sel-netmode">
-                    <option value="33">⚡ Mode 33: Force 5G Only (NR Only - Pure Standalone)</option>
-                    <option value="28">🚀 Mode 28: Force 5G + 4G (NR / LTE Only - No 2G/3G)</option>
-                    <option value="11">📶 Mode 11: Force 4G Only (LTE Only)</option>
-                    <option value="9">📞 Mode 9: 4G / 3G / 2G (Standard LTE / WCDMA / GSM)</option>
-                    <option value="2">📻 Mode 2: 3G Only (WCDMA)</option>
-                    <option value="1">📟 Mode 1: 2G Only (GSM)</option>
-                    <option value="26">🔄 Mode 26: Auto 5G / 4G / 3G / 2G (Samsung Default)</option>
-                </select>
-
-                <button class="btn btn-success" style="margin-top: 0.8rem; width: 100%;" onclick="applyNetworkMode()">
-                    🔒 Lock Network Mode
-                </button>
-
-                <!-- Explanation Box -->
-                <div class="exp-box warning">
-                    <div class="exp-header">🔒 Network Mode Details</div>
-                    <div class="exp-row"><span class="exp-key">What it does:</span> Programs search bitmasks via Android 13 TelephonyManager.</div>
-                    <div class="exp-row"><span class="exp-key">Real-World Impact:</span> Locking to <b>Mode 33 (5G Only)</b> keeps your data connection locked to high-speed 5G even when signal drops, preventing fallback to slow 4G Band 5.</div>
-                </div>
-            </div>
-
-            <!-- 6. Samsung IMS Telephony Engine -->
-            <div class="card">
-                <div class="card-header">
-                    <span>📞 Samsung IMS Telephony Engine</span>
-                    <span class="badge" id="badge-ims">IMS Active</span>
-                </div>
-                <p style="font-size: 0.83rem; color: var(--text-dim); margin-bottom: 0.6rem;">
-                    Full control over Samsung's native IP Multimedia Subsystem (IMS) telephony switches.
-                </p>
-
-                <div class="toggle-group">
-                    <div class="toggle-info">
-                        <div class="toggle-title">VoLTE / HD Audio (MMTEL)</div>
-                        <div class="toggle-desc">High Definition Voice over LTE / IMS packet audio bearer (QCI-1)</div>
+        <!-- ========================================== -->
+        <!-- TAB 4: SAMSUNG SECRET TOOLS & SPECTRUM MATRIX -->
+        <!-- ========================================== -->
+        <div class="tab-content" id="tab-tools">
+            <div class="grid">
+                <!-- Secret Codes Launcher -->
+                <div class="card grid-full">
+                    <div class="card-header">
+                        <span>🛠️ Samsung ServiceMode & Hardware Diagnostic Launchers</span>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="chk-volte" onchange="toggleVoLTE(this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+                    <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.8rem;">
+                        Broadcast Samsung's proprietary Secret Code root intents directly to ServiceMode app without typing in dialer.
+                    </p>
 
-                <div class="toggle-group">
-                    <div class="toggle-info">
-                        <div class="toggle-title">ViLTE (MMTEL-Video)</div>
-                        <div class="toggle-desc">Carrier-native Video over LTE without third-party apps</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;">
+                        <button class="btn btn-outline" onclick="launchCode('0011')">
+                            📊 ServiceMode (*#0011#)<br><span style="font-size: 0.7rem; color: var(--text-dim);">RF Telemetry & NR MIMO</span>
+                        </button>
+                        <button class="btn btn-outline" onclick="launchCode('2263')">
+                            🔒 Band Selection (*#2263#)<br><span style="font-size: 0.7rem; color: var(--text-dim);">Hardware Band Lock Menu</span>
+                        </button>
+                        <button class="btn btn-outline" onclick="launchCode('ims')">
+                            ⚙️ IMS Service Switch<br><span style="font-size: 0.7rem; color: var(--text-dim);">Samsung IMS System App</span>
+                        </button>
+                        <button class="btn btn-outline" onclick="launchCode('sysdump')">
+                            📑 SysDump (*#9900#)<br><span style="font-size: 0.7rem; color: var(--text-dim);">Modem & RIL Log Dumper</span>
+                        </button>
+                        <button class="btn btn-outline" onclick="launchCode('0228')">
+                            🔋 Battery Meter (*#0228#)<br><span style="font-size: 0.7rem; color: var(--text-dim);">ADC Fuel Gauge Readout</span>
+                        </button>
+                        <button class="btn btn-outline" onclick="launchCode('usb')">
+                            🔌 USB Settings (*#0808#)<br><span style="font-size: 0.7rem; color: var(--text-dim);">Modem / DM / RMNET Mode</span>
+                        </button>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="chk-vilte" onchange="toggleViLTE(this.checked)">
-                        <span class="slider"></span>
-                    </label>
                 </div>
 
-                <div class="toggle-group">
-                    <div class="toggle-info">
-                        <div class="toggle-title">VoWiFi (Wi-Fi Calling / ePDG)</div>
-                        <div class="toggle-desc">Tunnels encrypted voice & SMS calls through IPsec ePDG over Wi-Fi</div>
+                <!-- Spectrum Matrix Table -->
+                <div class="card grid-full">
+                    <div class="card-header">
+                        <span>🇮🇳 Indian Carrier Spectrum Directory & Current Live State</span>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="chk-vowifi" onchange="toggleVoWiFi(this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="toggle-group">
-                    <div class="toggle-info">
-                        <div class="toggle-title">VoNR (Voice over New Radio / 5G Voice)</div>
-                        <div class="toggle-desc">Crystal clear voice calling directly over 5G SA without dropping to LTE</div>
+                    <div style="overflow-x: auto;">
+                        <table class="carrier-table">
+                            <thead>
+                                <tr>
+                                    <th>Carrier</th>
+                                    <th>5G Architecture</th>
+                                    <th>5G NR Bands & ARFCN</th>
+                                    <th>4G LTE Bands</th>
+                                    <th>Device Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><b style="color: #60a5fa;">Reliance Jio</b><br><span style="font-size: 0.72rem; color: var(--text-dim);">PLMN 405858</span></td>
+                                    <td><span class="badge nr">Pure SA (Option 2)</span></td>
+                                    <td><b>n78 (3500MHz)</b> [ARFCN 634080 - 100MHz]<br><b>n28 (700MHz)</b> [ARFCN 156510 - 10MHz]</td>
+                                    <td>B3 (1800MHz), B5 (850MHz), B40 (2300MHz)</td>
+                                    <td><span class="badge active" id="status-jio">🟢 Active Serving</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b style="color: #f87171;">Bharti Airtel</b><br><span style="font-size: 0.72rem; color: var(--text-dim);">PLMN 40445 / 40410</span></td>
+                                    <td><span class="badge nsa">Pure NSA (Option 3x)</span></td>
+                                    <td><b>n78 (3500MHz)</b> [ARFCN 627264 / 631000]<br><b>n8 (900MHz), n3 (1800MHz), n1 (2100MHz)</b></td>
+                                    <td>B1 (2100MHz), B3 (1800MHz), B8, B40 (2300MHz)</td>
+                                    <td><span class="badge" id="status-airtel">⚪ Inactive</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b style="color: #fbbf24;">Vodafone Idea (Vi)</b><br><span style="font-size: 0.72rem; color: var(--text-dim);">PLMN 40404 / 40420</span></td>
+                                    <td><span class="badge">LTE-A / 5G Trial</span></td>
+                                    <td><b>n78 (3300MHz)</b> [ARFCN 623000 - Trial]</td>
+                                    <td>B1 (2100MHz), B3 (1800MHz), B8, B40, B41 (2500MHz)</td>
+                                    <td><span class="badge" id="status-vi">⚪ Inactive</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b style="color: #cbd5e1;">BSNL Mobile</b><br><span style="font-size: 0.72rem; color: var(--text-dim);">PLMN 40434 / 40453</span></td>
+                                    <td><span class="badge">4G Standard</span></td>
+                                    <td>N/A (4G Deployment Active)</td>
+                                    <td>B1 (2100MHz), B8 (900MHz), B41 (2500MHz)</td>
+                                    <td><span class="badge" id="status-bsnl">⚪ Inactive</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="chk-vonr" onchange="toggleVoNR(this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="toggle-group">
-                    <div class="toggle-info">
-                        <div class="toggle-title">SMS over IP (SMS-IP)</div>
-                        <div class="toggle-desc">Sends SMS messages via IMS data packets without CS fallback</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="chk-smsip" onchange="toggleSmsIp(this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div style="margin-top: 0.8rem;">
-                    <div class="stat-label" style="font-size: 0.8rem; margin-bottom: 0.3rem;">Wi-Fi Calling Preference (WFC Mode):</div>
-                    <select id="sel-wfc-mode" onchange="changeWfcMode(this.value)">
-                        <option value="1">📶 Cellular Preferred (Use cell tower first, Wi-Fi on weak signal)</option>
-                        <option value="2">🌐 Wi-Fi Preferred (Always prefer Wi-Fi calling when connected)</option>
-                        <option value="3">🔒 Wi-Fi Only (Never use cellular network for voice)</option>
-                    </select>
-                </div>
-
-                <!-- Explanation Box -->
-                <div class="exp-box">
-                    <div class="exp-header">📞 Samsung IMS Telephony Architecture</div>
-                    <div class="exp-row"><span class="exp-key">What it does:</span> Directly controls Samsung's proprietary <span class="exp-code">content://com.sec.ims.settings/imsswitch</span> database.</div>
-                    <div class="exp-row"><span class="exp-key">VoNR & SMS-IP:</span> Allows placing calls and receiving OTP SMS directly on 5G Standalone without dropping to 4G/2G!</div>
-                </div>
-            </div>
-
-            <!-- 7. Carrier Aggregation & Connectivity -->
-            <div class="card">
-                <div class="card-header">
-                    <span>⚡ Carrier Aggregation & Connectivity</span>
-                </div>
-                <p style="font-size: 0.83rem; color: var(--text-dim); margin-bottom: 0.6rem;">
-                    Modem channel bonding, data roaming switches, and cellular master controls.
-                </p>
-
-                <div class="toggle-group">
-                    <div class="toggle-info">
-                        <div class="toggle-title">LTE Carrier Aggregation (CA) Force</div>
-                        <div class="toggle-desc">Forces aggregation across multiple LTE bands (4G+ / LTE-A)</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="chk-lte-ca" onchange="toggleLteCa(this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="toggle-group">
-                    <div class="toggle-info">
-                        <div class="toggle-title">Cellular Mobile Data</div>
-                        <div class="toggle-desc">Master cellular data interface switch (rmnet0 / v4-rmnet0)</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="chk-mobile-data" onchange="toggleMobileData(this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="toggle-group">
-                    <div class="toggle-info">
-                        <div class="toggle-title">Data Roaming</div>
-                        <div class="toggle-desc">Allow data transmission while connected to roaming network circles</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="chk-roaming" onchange="toggleDataRoaming(this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="toggle-group">
-                    <div class="toggle-info">
-                        <div class="toggle-title">Smart Dual-SIM Data Switching</div>
-                        <div class="toggle-desc">Auto-routes cellular data through the secondary SIM during voice calls</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="chk-sds" onchange="toggleSmartDataSwitch(this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <button class="btn btn-purple" style="margin-top: 0.8rem; width: 100%;" onclick="restartRadio()">
-                    ⚡ Quick Radio Re-Attach (Reset Tower Connection)
-                </button>
-
-                <!-- Explanation Box -->
-                <div class="exp-box accent">
-                    <div class="exp-header">⚡ Carrier Aggregation & Data Details</div>
-                    <div class="exp-row"><span class="exp-key">Carrier Aggregation:</span> Bonds multiple carriers (PCC + SCC) to multiply download speeds. Supported combinations: B3 + B40, B3 + B41.</div>
-                </div>
-            </div>
-
-            <!-- 8. All Indian Carrier Spectrum Matrix & State -->
-            <div class="card grid-full">
-                <div class="card-header">
-                    <span>🇮🇳 Indian Carrier Spectrum Directory & Current Live State</span>
-                </div>
-                <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.8rem;">
-                    Complete breakdown of Indian cellular operator frequency spectrum, 5G architecture, key channel ARFCNs, and real-time device connection state.
-                </p>
-
-                <div style="overflow-x: auto;">
-                    <table class="carrier-table">
-                        <thead>
-                            <tr>
-                                <th>Carrier</th>
-                                <th>5G Architecture</th>
-                                <th>5G NR Bands & ARFCN</th>
-                                <th>4G LTE Bands</th>
-                                <th>Device Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><b style="color: #60a5fa;">Reliance Jio</b><br><span style="font-size: 0.72rem; color: var(--text-dim);">PLMN 405858</span></td>
-                                <td><span class="badge nr">Pure SA (Option 2)</span></td>
-                                <td><b>n78 (3500MHz)</b> [ARFCN 634080 - 100MHz]<br><b>n28 (700MHz)</b> [ARFCN 156510 - 10MHz]</td>
-                                <td>B3 (1800MHz), B5 (850MHz), B40 (2300MHz)</td>
-                                <td><span class="badge active" id="status-jio">🟢 Active Serving</span></td>
-                            </tr>
-                            <tr>
-                                <td><b style="color: #f87171;">Bharti Airtel</b><br><span style="font-size: 0.72rem; color: var(--text-dim);">PLMN 40445 / 40410</span></td>
-                                <td><span class="badge nsa">Pure NSA (Option 3x)</span></td>
-                                <td><b>n78 (3500MHz)</b> [ARFCN 627264 / 631000]<br><b>n8 (900MHz), n3 (1800MHz), n1 (2100MHz)</b></td>
-                                <td>B1 (2100MHz), B3 (1800MHz), B8, B40 (2300MHz)</td>
-                                <td><span class="badge" id="status-airtel">⚪ Inactive</span></td>
-                            </tr>
-                            <tr>
-                                <td><b style="color: #fbbf24;">Vodafone Idea (Vi)</b><br><span style="font-size: 0.72rem; color: var(--text-dim);">PLMN 40404 / 40420</span></td>
-                                <td><span class="badge">LTE-A / 5G Trial</span></td>
-                                <td><b>n78 (3300MHz)</b> [ARFCN 623000 - Trial]</td>
-                                <td>B1 (2100MHz), B3 (1800MHz), B8, B40, B41 (2500MHz)</td>
-                                <td><span class="badge" id="status-vi">⚪ Inactive</span></td>
-                            </tr>
-                            <tr>
-                                <td><b style="color: #cbd5e1;">BSNL Mobile</b><br><span style="font-size: 0.72rem; color: var(--text-dim);">PLMN 40434 / 40453</span></td>
-                                <td><span class="badge">4G Standard</span></td>
-                                <td>N/A (4G Deployment Active)</td>
-                                <td>B1 (2100MHz), B8 (900MHz), B41 (2500MHz)</td>
-                                <td><span class="badge" id="status-bsnl">⚪ Inactive</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Explanation Box -->
-                <div class="exp-box accent" style="margin-top: 1rem;">
-                    <div class="exp-header">🇮🇳 Carrier Spectrum Allocation Insights</div>
-                    <div class="exp-row"><span class="exp-key">Why Jio uses SA:</span> Jio purchased contiguous 700 MHz (Band n28) nationwide for deep indoor penetration and 3500 MHz (Band n78) with 100 MHz contiguous channels for gigabit speeds. It does not rely on legacy 2G/3G networks.</div>
-                    <div class="exp-row"><span class="exp-key">Why Airtel uses NSA:</span> Airtel leveraged its massive existing 4G LTE footprint (Band 3 & Band 40) as the anchor carrier, adding n78 via ENDC without requiring a standalone 5G core initially.</div>
-                </div>
-            </div>
-
-            <!-- 9. Samsung ServiceMode & Secret Tools -->
-            <div class="card grid-full">
-                <div class="card-header">
-                    <span>🛠️ Samsung ServiceMode & Hardware Diagnostic Launchers</span>
-                </div>
-                <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.8rem;">
-                    Launch Samsung's hidden engineering menus, hardware band selection suites, battery calibration, and sysdumps directly without typing dialer codes.
-                </p>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;">
-                    <button class="btn btn-outline" onclick="launchCode('0011')">
-                        📊 ServiceMode (*#0011#)<br><span style="font-size: 0.7rem; color: var(--text-dim);">RF Telemetry & NR MIMO</span>
-                    </button>
-                    <button class="btn btn-outline" onclick="launchCode('2263')">
-                        🔒 Band Selection (*#2263#)<br><span style="font-size: 0.7rem; color: var(--text-dim);">Hardware Band Lock Menu</span>
-                    </button>
-                    <button class="btn btn-outline" onclick="launchCode('ims')">
-                        ⚙️ IMS Service Switch<br><span style="font-size: 0.7rem; color: var(--text-dim);">Samsung IMS System App</span>
-                    </button>
-                    <button class="btn btn-outline" onclick="launchCode('sysdump')">
-                        📑 SysDump (*#9900#)<br><span style="font-size: 0.7rem; color: var(--text-dim);">Modem & RIL Log Dumper</span>
-                    </button>
-                    <button class="btn btn-outline" onclick="launchCode('0228')">
-                        🔋 Battery Meter (*#0228#)<br><span style="font-size: 0.7rem; color: var(--text-dim);">ADC Fuel Gauge Readout</span>
-                    </button>
-                    <button class="btn btn-outline" onclick="launchCode('usb')">
-                        🔌 USB Settings (*#0808#)<br><span style="font-size: 0.7rem; color: var(--text-dim);">Modem / DM / RMNET Mode</span>
-                    </button>
-                </div>
-
-                <!-- Explanation Box -->
-                <div class="exp-box warning" style="margin-top: 1rem;">
-                    <div class="exp-header">🛠️ Samsung Secret Codes Protocol</div>
-                    <div class="exp-row"><span class="exp-key">Mechanism:</span> Broadcasts root intent <span class="exp-code">com.samsung.android.action.SECRET_CODE</span> directly to <span class="exp-code">com.sec.android.RilServiceModeApp</span>.</div>
-                    <div class="exp-row"><span class="exp-key">Band Selection (*#2263#):</span> Allows hardware-level locking of specific frequency bands in the MediaTek transceiver.</div>
-                </div>
-            </div>
-
-            <!-- 10. Hardware Certified RF Bands Directory -->
-            <div class="card grid-full">
-                <div class="card-header">
-                    <span>📋 Device Hardware Certified RF Bands (SM-M326B / MT6853)</span>
-                </div>
-                <div>
-                    <div style="font-size: 0.88rem; color: #60a5fa; margin-bottom: 0.4rem; font-weight: 700;">
-                        5G NR Bands (12 Bands Certified by MediaTek Transceiver):
-                    </div>
-                    <div class="bands-grid" id="grid-5g-bands"></div>
-                </div>
-                <div style="margin-top: 1.2rem;">
-                    <div style="font-size: 0.88rem; color: #93c5fd; margin-bottom: 0.4rem; font-weight: 700;">
-                        4G LTE Bands (16 Bands Certified):
-                    </div>
-                    <div class="bands-grid" id="grid-4g-bands"></div>
                 </div>
             </div>
         </div>
@@ -771,12 +932,24 @@
 
     <script>
         let targetSlot = 'both';
+        let selectedBands = new Set();
+        let initialBandsInitialized = false;
 
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.innerText = msg;
             t.style.display = 'block';
             setTimeout(() => { t.style.display = 'none'; }, 3500);
+        }
+
+        function switchTab(tabId) {
+            ['dash', 'lock', 'tweaks', 'tools'].forEach(t => {
+                const b = document.getElementById(`tab-btn-${t}`);
+                const c = document.getElementById(`tab-${t}`);
+                if (b) b.className = (t === tabId) ? 'tab-btn active' : 'tab-btn';
+                if (c) c.className = (t === tabId) ? 'tab-content active' : 'tab-content';
+            });
+            localStorage.setItem('activeTab', tabId);
         }
 
         function setTargetSlot(slot) {
@@ -787,9 +960,9 @@
             });
         }
 
-        async function api(action, val = '', slot = '', code = '', arfcn = '', pci = '') {
+        async function api(action, val = '', slot = '', code = '', arfcn = '', pci = '', label = '', param = '') {
             try {
-                let url = `/cgi-bin/api.cgi?action=${encodeURIComponent(action)}&val=${encodeURIComponent(val)}&slot=${encodeURIComponent(slot)}&code=${encodeURIComponent(code)}&arfcn=${encodeURIComponent(arfcn)}&pci=${encodeURIComponent(pci)}`;
+                let url = `/cgi-bin/api.cgi?action=${encodeURIComponent(action)}&val=${encodeURIComponent(val)}&slot=${encodeURIComponent(slot)}&code=${encodeURIComponent(code)}&arfcn=${encodeURIComponent(arfcn)}&pci=${encodeURIComponent(pci)}&label=${encodeURIComponent(label)}&param=${encodeURIComponent(param)}`;
                 const res = await fetch(url);
                 return await res.json();
             } catch (e) {
@@ -797,37 +970,6 @@
                 return { status: 'error', message: e.toString() };
             }
         }
-
-        const BAND_INFO = {
-            'n1': { freq: '2100 MHz', type: 'FDD', op: 'Global' },
-            'n3': { freq: '1800 MHz', type: 'FDD', op: 'Jio/Airtel' },
-            'n5': { freq: '850 MHz', type: 'FDD', op: 'Global' },
-            'n7': { freq: '2600 MHz', type: 'FDD', op: 'Global' },
-            'n8': { freq: '900 MHz', type: 'FDD', op: 'Airtel/Vi' },
-            'n20': { freq: '800 MHz', type: 'FDD', op: 'Global' },
-            'n28': { freq: '700 MHz', type: 'FDD', op: 'Jio 5G SA' },
-            'n38': { freq: '2600 MHz', type: 'TDD', op: 'Global' },
-            'n40': { freq: '2300 MHz', type: 'TDD', op: 'Airtel/Jio' },
-            'n41': { freq: '2500 MHz', type: 'TDD', op: 'Vi/Global' },
-            'n77': { freq: '3700 MHz', type: 'TDD', op: '5G Mid-Band' },
-            'n78': { freq: '3500 MHz', type: 'TDD', op: 'Jio/Airtel 5G' },
-            'B1': { freq: '2100 MHz', type: 'FDD', op: 'Global' },
-            'B2': { freq: '1900 MHz', type: 'FDD', op: 'Global' },
-            'B3': { freq: '1800 MHz', type: 'FDD', op: 'Jio/Airtel/Vi' },
-            'B4': { freq: '1700/2100', type: 'FDD', op: 'AWS' },
-            'B5': { freq: '850 MHz', type: 'FDD', op: 'Jio 4G' },
-            'B7': { freq: '2600 MHz', type: 'FDD', op: 'Global' },
-            'B8': { freq: '900 MHz', type: 'FDD', op: 'Airtel/Vi' },
-            'B12': { freq: '700 MHz', type: 'FDD', op: 'Global' },
-            'B17': { freq: '700 MHz', type: 'FDD', op: 'Global' },
-            'B20': { freq: '800 MHz', type: 'FDD', op: 'Global' },
-            'B26': { freq: '850 MHz', type: 'FDD', op: 'Global' },
-            'B28': { freq: '700 MHz', type: 'FDD', op: 'Global' },
-            'B38': { freq: '2600 MHz', type: 'TDD', op: 'Global' },
-            'B40': { freq: '2300 MHz', type: 'TDD', op: 'Jio/Airtel' },
-            'B41': { freq: '2500 MHz', type: 'TDD', op: 'Vi 4G' },
-            'B66': { freq: '1700/2100', type: 'FDD', op: 'Ext AWS' }
-        };
 
         const SELECT_5G_BANDS = [
             { id: 'n78', name: 'n78 (3500 MHz)', op: 'Jio/Airtel 5G (100MHz)', tag: 'High Speed TDD' },
@@ -850,9 +992,6 @@
             { id: 'B28', name: 'B28 (700 MHz)', op: '4G Coverage', tag: 'Low-Band FDD' },
             { id: 'B41', name: 'B41 (2500 MHz)', op: 'Vi/BSNL High Speed', tag: 'SCC/CA TDD' }
         ];
-
-        let selectedBands = new Set();
-        let initialBandsInitialized = false;
 
         function initMultiBandGrid() {
             renderMultiBandSection('grid-select-5g', SELECT_5G_BANDS);
@@ -914,7 +1053,7 @@
             if (el4) el4.innerText = `${c4g} selected`;
         }
 
-        function presetBands(bands) {
+        function applyPresetBands(bands, label) {
             selectedBands.clear();
             bands.forEach(b => selectedBands.add(b));
             SELECT_5G_BANDS.concat(SELECT_4G_BANDS).forEach(item => {
@@ -925,36 +1064,13 @@
                 if (chip) chip.className = 'multiband-chip' + (isSel ? ' selected' : '');
             });
             updateSelectionCounts();
-            showToast(`Preset: ${bands.join(' + ')}`);
-        }
-
-        function selectAllBands() {
-            SELECT_5G_BANDS.concat(SELECT_4G_BANDS).forEach(item => {
-                selectedBands.add(item.id);
-                const cb = document.getElementById(`cb-${item.id}`);
-                const chip = document.getElementById(`mb-chip-${item.id}`);
-                if (cb) cb.checked = true;
-                if (chip) chip.className = 'multiband-chip selected';
-            });
-            updateSelectionCounts();
-            showToast('All 5G & 4G bands selected');
-        }
-
-        function deselectAllBands() {
-            selectedBands.clear();
-            SELECT_5G_BANDS.concat(SELECT_4G_BANDS).forEach(item => {
-                const cb = document.getElementById(`cb-${item.id}`);
-                const chip = document.getElementById(`mb-chip-${item.id}`);
-                if (cb) cb.checked = false;
-                if (chip) chip.className = 'multiband-chip';
-            });
-            updateSelectionCounts();
-            showToast('Cleared all band selections');
+            showToast(`Applied preset: ${label}`);
+            applyMultiBandLock();
         }
 
         async function applyMultiBandLock() {
             if (selectedBands.size === 0) {
-                alert('Please select at least 1 band to lock! Or click "Clear Band Lock" to restore all.');
+                alert('Please select at least 1 band to lock! Or click "Restore All Certified Bands".');
                 return;
             }
             const bandsArray = Array.from(selectedBands);
@@ -969,229 +1085,87 @@
             showToast('Clearing band lock & restoring all bands...');
             const res = await api('clear_band_lock');
             showToast(res.message);
-            selectAllBands();
+            SELECT_5G_BANDS.concat(SELECT_4G_BANDS).forEach(item => selectedBands.add(item.id));
+            SELECT_5G_BANDS.concat(SELECT_4G_BANDS).forEach(item => {
+                const cb = document.getElementById(`cb-${item.id}`);
+                const chip = document.getElementById(`mb-chip-${item.id}`);
+                if (cb) cb.checked = true;
+                if (chip) chip.className = 'multiband-chip selected';
+            });
+            updateSelectionCounts();
             setTimeout(loadStatus, 2500);
         }
 
-        function fillTargetCell(arfcn, pci) {
-            document.getElementById('inp-target-arfcn').value = arfcn;
-            document.getElementById('inp-target-pci').value = pci;
-            showToast(`Filled ARFCN ${arfcn} ${pci ? '| PCI ' + pci : ''}`);
-        }
-
-        async function applyCellLock() {
+        // Target Cells Whitelist Functions
+        async function addTargetCellFromInput() {
             const arfcn = document.getElementById('inp-target-arfcn').value.trim();
             const pci = document.getElementById('inp-target-pci').value.trim();
+            const label = document.getElementById('inp-target-label').value.trim();
             if (!arfcn) {
-                alert('Please enter or select a Target NR ARFCN!');
+                alert('Please enter a Target ARFCN (e.g. 634080)!');
                 return;
             }
-            showToast('Applying Target Cell Lock & cycling radio...');
-            const res = await api('set_cell_target', '', '', '', arfcn, pci);
-            showToast(res.message);
-            setTimeout(loadStatus, 2500);
-        }
-
-        async function clearCellLock() {
-            showToast('Clearing Target Cell Lock...');
-            const res = await api('set_cell_target', '', '', '', 'None', '');
+            showToast(`Adding target ARFCN ${arfcn}...`);
+            const res = await api('add_target_cell', '', '', '', arfcn, pci, label);
             showToast(res.message);
             document.getElementById('inp-target-arfcn').value = '';
             document.getElementById('inp-target-pci').value = '';
+            document.getElementById('inp-target-label').value = '';
             loadStatus();
         }
 
-        async function setNrArchitecture(mode) {
-            showToast(`Setting 5G Architecture to ${mode.toUpperCase()}...`);
-            const res = await api('set_nr_mode', mode);
+        async function presetTargetCells(list) {
+            await api('clear_target_cells');
+            for (const item of list) {
+                await api('add_target_cell', '', '', '', item[0], item[1] || '', item[2] || '');
+            }
+            showToast('Loaded multi-target cell cluster! Applying...');
+            await applyTargetCells();
+        }
+
+        async function applyTargetCells() {
+            showToast('Applying Target Cell Whitelist & cycling radio...');
+            const res = await api('apply_target_cells');
+            showToast(res.message);
+            setTimeout(loadStatus, 2500);
+        }
+
+        async function removeTargetCell(arfcn, pci) {
+            showToast(`Removing ARFCN ${arfcn}...`);
+            const res = await api('remove_target_cell', '', '', '', arfcn, pci);
             showToast(res.message);
             loadStatus();
         }
 
-        async function loadStatus() {
-            const d = await api('status');
-            if (d && d.operator) {
-                document.getElementById('badge-operator').innerText = d.operator;
-                document.getElementById('val-rat').innerText = d.rat;
-                document.getElementById('val-band').innerText = d.band;
-                document.getElementById('val-arfcn').innerText = d.arfcn;
-                document.getElementById('val-pci').innerText = d.pci;
-                document.getElementById('val-bw').innerText = d.bandwidth_mhz > 0 ? `${d.bandwidth_mhz} MHz` : 'N/A';
-                document.getElementById('val-duplex').innerText = d.duplex_mode;
-                document.getElementById('val-plmn').innerText = d.plmn;
-                document.getElementById('val-ipv4').innerText = d.ip_v4;
-                document.getElementById('val-ipv6').innerText = d.ip_v6;
-                document.getElementById('badge-rat').innerText = d.rat.replace('_', ' ');
-
-                // Cell lock state
-                if (d.cell_locked) {
-                    document.getElementById('val-cell-locked').innerHTML = '<span style="color: #34d399; font-weight: 700;">🔒 LOCKED TO TARGET</span>';
-                    document.getElementById('badge-lock-status').innerText = `Locked: ARFCN ${d.target_arfcn}`;
-                    document.getElementById('badge-lock-status').className = 'badge active';
-                } else if (d.target_arfcn && d.target_arfcn !== 'None') {
-                    document.getElementById('val-cell-locked').innerHTML = `<span style="color: #fbbf24;">Targeting: ${d.target_arfcn}</span>`;
-                    document.getElementById('badge-lock-status').innerText = `Targeting: ${d.target_arfcn}`;
-                    document.getElementById('badge-lock-status').className = 'badge locked';
-                } else {
-                    document.getElementById('val-cell-locked').innerText = 'Auto Roaming';
-                    document.getElementById('badge-lock-status').innerText = 'Cell Lock: Auto';
-                    document.getElementById('badge-lock-status').className = 'badge';
-                }
-
-                // Multi-Band Lock Telemetry
-                if (d.band_lock_active && d.locked_bands && d.locked_bands !== 'None') {
-                    document.getElementById('badge-multiband-status').innerText = `🔒 Locked: ${d.locked_bands}`;
-                    document.getElementById('badge-multiband-status').className = 'badge active';
-                    document.getElementById('val-locked-bands').innerHTML = `<span style="color: #34d399; font-weight: 700;">🔒 ${d.locked_bands}</span>`;
-
-                    if (!initialBandsInitialized) {
-                        const activeList = d.locked_bands.split(',').map(s => s.trim());
-                        presetBands(activeList);
-                        initialBandsInitialized = true;
-                    }
-                } else {
-                    document.getElementById('badge-multiband-status').innerText = 'Band Lock: Auto (All Bands)';
-                    document.getElementById('badge-multiband-status').className = 'badge';
-                    document.getElementById('val-locked-bands').innerText = 'All Certified Bands (Auto Roaming)';
-
-                    if (!initialBandsInitialized) {
-                        selectAllBands();
-                        initialBandsInitialized = true;
-                    }
-                }
-
-                if (d.target_arfcn && d.target_arfcn !== 'None' && !document.getElementById('inp-target-arfcn').value) {
-                    document.getElementById('inp-target-arfcn').value = d.target_arfcn;
-                    if (d.target_pci && d.target_pci !== 'None') {
-                        document.getElementById('inp-target-pci').value = d.target_pci;
-                    }
-                }
-
-                // RSRP
-                if (d.rsrp > -900) {
-                    document.getElementById('val-rsrp').innerText = `${d.rsrp} dBm`;
-                    let rsrpPct = Math.min(100, Math.max(0, ((d.rsrp - (-140)) / (80)) * 100));
-                    const fRsrp = document.getElementById('fill-rsrp');
-                    fRsrp.style.width = `${rsrpPct}%`;
-                    fRsrp.className = d.rsrp > -95 ? 'meter-fill' : d.rsrp > -110 ? 'meter-fill warn' : 'meter-fill bad';
-                }
-
-                // RSRQ
-                if (d.rsrq > -900) {
-                    document.getElementById('val-rsrq').innerText = `${d.rsrq} dB`;
-                    let rsrqPct = Math.min(100, Math.max(0, ((d.rsrq - (-20)) / (17)) * 100));
-                    const fRsrq = document.getElementById('fill-rsrq');
-                    fRsrq.style.width = `${rsrqPct}%`;
-                    fRsrq.className = d.rsrq > -12 ? 'meter-fill' : 'meter-fill warn';
-                }
-
-                // SINR
-                if (d.sinr > -900) {
-                    document.getElementById('val-sinr').innerText = `${d.sinr} dB`;
-                    let sinrPct = Math.min(100, Math.max(0, ((d.sinr - (-10)) / (40)) * 100));
-                    const fSinr = document.getElementById('fill-sinr');
-                    fSinr.style.width = `${sinrPct}%`;
-                    fSinr.className = d.sinr > 15 ? 'meter-fill' : d.sinr > 5 ? 'meter-fill warn' : 'meter-fill bad';
-                }
-
-                document.getElementById('badge-level').innerText = `Signal: ${d.signal_level} / 4`;
-                document.getElementById('val-board').innerText = `${d.modem_board} (${d.product_code})`;
-                document.getElementById('val-baseband').innerText = d.baseband;
-                document.getElementById('val-ril').innerText = d.ril_ver;
-                document.getElementById('val-sims').innerText = `SIM1: ${d.sim1_state} | SIM2: ${d.sim2_state}`;
-
-                // Selects & Toggles
-                document.getElementById('sel-netmode').value = d.preferred_mode.split(',')[0];
-                document.getElementById('badge-prefmode').innerText = `Mode ${d.preferred_mode}`;
-                
-                document.getElementById('chk-nr-sa').checked = d.nr_sa_enabled;
-                document.getElementById('chk-nr-nsa').checked = d.nr_nsa_enabled;
-                document.getElementById('chk-endc').checked = d.endc_enabled;
-                document.getElementById('chk-lte-ca').checked = d.lte_ca_enabled;
-
-                if (d.nr_sa_enabled && d.nr_nsa_enabled) {
-                    document.getElementById('badge-nr-mode').innerText = 'Dual SA+NSA';
-                    document.getElementById('badge-nr-mode').className = 'badge nr';
-                } else if (d.nr_sa_enabled) {
-                    document.getElementById('badge-nr-mode').innerText = 'Pure SA (Option 2)';
-                    document.getElementById('badge-nr-mode').className = 'badge nr';
-                } else if (d.nr_nsa_enabled) {
-                    document.getElementById('badge-nr-mode').innerText = 'Pure NSA (Option 3x)';
-                    document.getElementById('badge-nr-mode').className = 'badge nsa';
-                } else {
-                    document.getElementById('badge-nr-mode').innerText = '5G Disabled';
-                    document.getElementById('badge-nr-mode').className = 'badge';
-                }
-
-                document.getElementById('chk-volte').checked = d.volte_enabled;
-                document.getElementById('chk-vilte').checked = d.vilte_enabled;
-                document.getElementById('chk-vowifi').checked = d.vowifi_enabled;
-                document.getElementById('chk-vonr').checked = d.vonr_enabled;
-                document.getElementById('chk-smsip').checked = d.smsip_enabled;
-                document.getElementById('sel-wfc-mode').value = d.wfc_mode || "1";
-
-                document.getElementById('chk-mobile-data').checked = d.mobile_data;
-                document.getElementById('chk-roaming').checked = d.data_roaming;
-                document.getElementById('chk-sds').checked = d.smart_data_switch;
-
-                // Carrier Matrix Highlights
-                const opName = (d.operator || '').toLowerCase();
-                document.getElementById('status-jio').className = opName.includes('jio') ? 'badge active' : 'badge';
-                document.getElementById('status-jio').innerText = opName.includes('jio') ? '🟢 Active Serving' : '⚪ Inactive';
-                document.getElementById('status-airtel').className = opName.includes('airtel') ? 'badge active' : 'badge';
-                document.getElementById('status-airtel').innerText = opName.includes('airtel') ? '🟢 Active Serving' : '⚪ Inactive';
-                document.getElementById('status-vi').className = (opName.includes('vi') || opName.includes('vodafone') || opName.includes('idea')) ? 'badge active' : 'badge';
-                document.getElementById('status-vi').innerText = (opName.includes('vi') || opName.includes('vodafone') || opName.includes('idea')) ? '🟢 Active Serving' : '⚪ Inactive';
-
-                // Render Bands
-                renderBands('grid-5g-bands', d.supported_5g, d.band);
-                renderBands('grid-4g-bands', d.supported_4g, d.band);
-            }
+        async function clearAllTargetCells() {
+            showToast('Clearing all target cells...');
+            const res = await api('clear_target_cells');
+            showToast(res.message);
+            loadStatus();
         }
 
-        function renderBands(elId, bands, activeBand) {
-            const container = document.getElementById(elId);
-            container.innerHTML = '';
-            bands.forEach(b => {
-                const chip = document.createElement('div');
-                const isMatch = b.toLowerCase() === activeBand.toLowerCase() || 
-                                (activeBand.toLowerCase() === 'n77' && b.toLowerCase() === 'n78') ||
-                                (activeBand.toLowerCase() === 'n78' && b.toLowerCase() === 'n77');
-                chip.className = 'band-chip' + (isMatch ? ' active' : '');
-                const info = BAND_INFO[b] || { freq: '', type: '', op: '' };
-                chip.innerHTML = `<span>${b}</span><span class="band-sub">${info.freq}</span><span class="band-sub">${info.op}</span>`;
-                container.appendChild(chip);
-            });
+        // Kernel & Radio Tweaks Functions
+        async function applyKernelTweak(param, val) {
+            showToast(`Setting kernel parameter ${param} to ${val}...`);
+            const res = await api('set_kernel_tweak', val, '', '', '', '', '', param);
+            showToast(res.message);
+            loadStatus();
+        }
+
+        async function applyRadioProp(prop, val) {
+            showToast(`Setting radio prop ${prop} to ${val}...`);
+            const res = await api('set_radio_prop', val, '', '', '', '', '', prop);
+            showToast(res.message);
+            loadStatus();
+        }
+
+        async function toggleRadioTweak(prop, checked) {
+            applyRadioProp(prop, checked ? '1' : '0');
         }
 
         async function applyNetworkMode() {
             const mode = document.getElementById('sel-netmode').value;
             const res = await api('set_network_mode', mode, targetSlot);
-            showToast(res.message);
-            loadStatus();
-        }
-
-        async function toggleNrMode() {
-            const sa = document.getElementById('chk-nr-sa').checked;
-            const nsa = document.getElementById('chk-nr-nsa').checked;
-            let val = 'off';
-            if (sa && nsa) val = 'both';
-            else if (sa) val = 'sa';
-            else if (nsa) val = 'nsa';
-
-            const res = await api('set_nr_mode', val);
-            showToast(res.message);
-            loadStatus();
-        }
-
-        async function toggleEndc(checked) {
-            const res = await api('set_endc', checked ? '1' : '0');
-            showToast(res.message);
-            loadStatus();
-        }
-
-        async function toggleLteCa(checked) {
-            const res = await api('set_lte_ca', checked ? '1' : '0');
             showToast(res.message);
             loadStatus();
         }
@@ -1210,12 +1184,6 @@
 
         async function toggleVoWiFi(checked) {
             const res = await api('set_vowifi', checked ? '1' : '0', targetSlot === '1' ? '1' : '0');
-            showToast(res.message);
-            loadStatus();
-        }
-
-        async function toggleVoNR(checked) {
-            const res = await api('set_vonr', checked ? '1' : '0');
             showToast(res.message);
             loadStatus();
         }
@@ -1269,11 +1237,195 @@
             loadStatus();
         }
 
+        // Live Telemetry Loader
+        async function loadStatus() {
+            const d = await api('status');
+            if (!d || !d.operator) return;
+
+            // Header & Serving Cell
+            document.getElementById('badge-operator').innerText = d.operator;
+            document.getElementById('val-rat').innerText = d.rat;
+            document.getElementById('val-band').innerText = d.band;
+            document.getElementById('val-arfcn').innerText = d.arfcn;
+            document.getElementById('val-pci').innerText = d.pci;
+            document.getElementById('val-bw').innerText = d.bandwidth_mhz > 0 ? `${d.bandwidth_mhz} MHz` : 'N/A';
+            document.getElementById('val-duplex').innerText = d.duplex_mode;
+            document.getElementById('val-plmn').innerText = d.plmn;
+            document.getElementById('val-tac').innerText = d.tac || 'N/A';
+            document.getElementById('val-nci').innerText = d.nci || 'N/A';
+            document.getElementById('badge-rat').innerText = d.rat.replace('_', ' ');
+
+            // Cell lock status
+            if (d.cell_locked) {
+                document.getElementById('val-cell-locked').innerHTML = `<span style="color: #34d399; font-weight: 700;">🔒 LOCKED: ${d.cell_lock_label || d.target_pci}</span>`;
+                document.getElementById('badge-lock-status').innerText = `Locked: ${d.cell_lock_label || d.target_arfcn}`;
+                document.getElementById('badge-lock-status').className = 'badge active';
+            } else if (d.target_arfcn && d.target_arfcn !== 'None') {
+                document.getElementById('val-cell-locked').innerHTML = `<span style="color: #fbbf24;">Targeting: ${d.target_arfcn}</span>`;
+                document.getElementById('badge-lock-status').innerText = `Targeting: ${d.target_arfcn}`;
+                document.getElementById('badge-lock-status').className = 'badge locked';
+            } else {
+                document.getElementById('val-cell-locked').innerText = 'Auto Roaming';
+                document.getElementById('badge-lock-status').innerText = 'Cell Lock: Auto';
+                document.getElementById('badge-lock-status').className = 'badge';
+            }
+
+            // Target cells list render
+            const tcContainer = document.getElementById('target-cells-list-container');
+            if (tcContainer) {
+                if (d.target_cells && d.target_cells.length > 0) {
+                    tcContainer.innerHTML = '';
+                    d.target_cells.forEach(tc => {
+                        const isMatch = (tc.arfcn == d.arfcn && (!tc.pci || tc.pci == 'None' || tc.pci == d.pci));
+                        const item = document.createElement('div');
+                        item.className = 'target-cell-item' + (isMatch ? ' active-match' : '');
+                        item.innerHTML = `
+                            <div>
+                                <span style="font-weight: 700; color: #fff;">${tc.label}</span>
+                                <span style="color: var(--text-dim); margin-left: 0.5rem; font-size: 0.8rem;">ARFCN: <b style="color: #38bdf8;">${tc.arfcn}</b> | PCI: <b style="color: #facc15;">${tc.pci || 'Any'}</b></span>
+                                ${isMatch ? '<span class="badge active" style="margin-left: 0.5rem; padding: 0.15rem 0.45rem;">🟢 Active Serving</span>' : ''}
+                            </div>
+                            <button class="btn btn-outline btn-sm" onclick="removeTargetCell('${tc.arfcn}', '${tc.pci}')">✕</button>
+                        `;
+                        tcContainer.appendChild(item);
+                    });
+                } else {
+                    tcContainer.innerHTML = `<div style="font-size: 0.84rem; color: var(--text-dim); padding: 0.5rem; background: #0b1220; border-radius: 6px;">No specific target cells configured (Operating on full auto network roaming).</div>`;
+                }
+            }
+
+            // Multi-Band Lock Telemetry
+            if (d.band_lock_active && d.locked_bands && d.locked_bands !== 'None') {
+                document.getElementById('badge-multiband-status').innerText = `🔒 Locked: ${d.locked_bands}`;
+                document.getElementById('badge-multiband-status').className = 'badge active';
+                document.getElementById('val-locked-bands').innerHTML = `<span style="color: #34d399; font-weight: 700;">🔒 ${d.locked_bands}</span>`;
+
+                if (!initialBandsInitialized) {
+                    const activeList = d.locked_bands.split(',').map(s => s.trim());
+                    selectedBands.clear();
+                    activeList.forEach(b => selectedBands.add(b));
+                    SELECT_5G_BANDS.concat(SELECT_4G_BANDS).forEach(item => {
+                        const cb = document.getElementById(`cb-${item.id}`);
+                        const chip = document.getElementById(`mb-chip-${item.id}`);
+                        const isSel = selectedBands.has(item.id);
+                        if (cb) cb.checked = isSel;
+                        if (chip) chip.className = 'multiband-chip' + (isSel ? ' selected' : '');
+                    });
+                    updateSelectionCounts();
+                    initialBandsInitialized = true;
+                }
+            } else {
+                document.getElementById('badge-multiband-status').innerText = 'Band Lock: Auto (All Bands)';
+                document.getElementById('badge-multiband-status').className = 'badge';
+                document.getElementById('val-locked-bands').innerText = 'All Certified Bands (Auto Roaming)';
+
+                if (!initialBandsInitialized) {
+                    SELECT_5G_BANDS.concat(SELECT_4G_BANDS).forEach(item => selectedBands.add(item.id));
+                    SELECT_5G_BANDS.concat(SELECT_4G_BANDS).forEach(item => {
+                        const cb = document.getElementById(`cb-${item.id}`);
+                        const chip = document.getElementById(`mb-chip-${item.id}`);
+                        if (cb) cb.checked = true;
+                        if (chip) chip.className = 'multiband-chip selected';
+                    });
+                    updateSelectionCounts();
+                    initialBandsInitialized = true;
+                }
+            }
+
+            // RF Meters
+            if (d.rsrp > -900) {
+                document.getElementById('val-rsrp').innerText = `${d.rsrp} dBm`;
+                let rsrpPct = Math.min(100, Math.max(0, ((d.rsrp - (-140)) / (80)) * 100));
+                const fRsrp = document.getElementById('fill-rsrp');
+                fRsrp.style.width = `${rsrpPct}%`;
+                fRsrp.className = d.rsrp > -95 ? 'meter-fill' : d.rsrp > -110 ? 'meter-fill warn' : 'meter-fill bad';
+            }
+            if (d.rsrq > -900) {
+                document.getElementById('val-rsrq').innerText = `${d.rsrq} dB`;
+                let rsrqPct = Math.min(100, Math.max(0, ((d.rsrq - (-20)) / (17)) * 100));
+                const fRsrq = document.getElementById('fill-rsrq');
+                fRsrq.style.width = `${rsrqPct}%`;
+                fRsrq.className = d.rsrq > -12 ? 'meter-fill' : 'meter-fill warn';
+            }
+            if (d.sinr > -900) {
+                document.getElementById('val-sinr').innerText = `${d.sinr} dB`;
+                let sinrPct = Math.min(100, Math.max(0, ((d.sinr - (-10)) / (40)) * 100));
+                const fSinr = document.getElementById('fill-sinr');
+                fSinr.style.width = `${sinrPct}%`;
+                fSinr.className = d.sinr > 15 ? 'meter-fill' : d.sinr > 5 ? 'meter-fill warn' : 'meter-fill bad';
+            }
+            document.getElementById('badge-level').innerText = `Signal: ${d.signal_level} / 4`;
+            document.getElementById('val-board').innerText = `${d.modem_board} (${d.product_code})`;
+            document.getElementById('val-baseband').innerText = d.baseband;
+            document.getElementById('val-ril').innerText = d.ril_ver;
+            document.getElementById('val-sims').innerText = `SIM1: ${d.sim1_state} | SIM2: ${d.sim2_state}`;
+
+            // Component Carrier Aggregation Breakdown
+            document.getElementById('val-ca-pcc').innerText = `${d.band} (ARFCN ${d.arfcn} | PCI ${d.pci})`;
+            document.getElementById('val-ca-pcc-bw').innerText = `${d.bandwidth_mhz} MHz`;
+            document.getElementById('val-ca-total-bw').innerText = `${d.bandwidth_mhz} MHz`;
+            document.getElementById('val-ca-mode').innerText = d.nr_sa_enabled ? '5G Standalone (Option 2)' : '5G NSA / LTE-A';
+            document.getElementById('val-ca-force').innerText = d.lte_ca_enabled ? '🟢 Enabled (Forced)' : '⚪ Inactive';
+            document.getElementById('val-ca-endc').innerText = d.endc_enabled ? '🟢 Enabled (Dual Radio)' : '⚪ Disabled';
+            document.getElementById('badge-ca-status').innerText = d.is_ca_active ? 'CA Active (Multi-CC)' : 'Single Carrier (PCC)';
+            document.getElementById('badge-ca-status').className = d.is_ca_active ? 'badge active' : 'badge';
+
+            // IP & IMS
+            document.getElementById('val-ipv4').innerText = d.ip_v4;
+            document.getElementById('val-ipv6').innerText = d.ip_v6;
+            document.getElementById('val-vonr-state').innerHTML = d.vonr_enabled ? '<span style="color: #34d399;">🟢 Active</span>' : '<span style="color: var(--text-dim);">⚪ Disabled</span>';
+            document.getElementById('val-volte-state').innerHTML = d.volte_enabled ? '<span style="color: #34d399;">🟢 Active</span>' : '<span style="color: var(--text-dim);">⚪ Disabled</span>';
+            document.getElementById('val-vowifi-state').innerHTML = d.vowifi_enabled ? '<span style="color: #34d399;">🟢 Active</span>' : '<span style="color: var(--text-dim);">⚪ Disabled</span>';
+            document.getElementById('val-smsip-state').innerHTML = d.smsip_enabled ? '<span style="color: #34d399;">🟢 Active</span>' : '<span style="color: var(--text-dim);">⚪ Disabled</span>';
+
+            // Tweaks values
+            if (d.kernel_tweaks) {
+                document.getElementById('sel-tcp-cong').value = d.kernel_tweaks.tcp_congestion;
+                document.getElementById('tweak-tcp-ws').checked = (d.kernel_tweaks.tcp_window_scaling == 1);
+                document.getElementById('tweak-tcp-fo').checked = (d.kernel_tweaks.tcp_fastopen > 0);
+                document.getElementById('tweak-ip-fwd').checked = (d.kernel_tweaks.ip_forward == 1);
+                document.getElementById('sel-rmnet-mtu').value = d.kernel_tweaks.rmnet0_mtu;
+                document.getElementById('val-mtu').innerText = d.kernel_tweaks.rmnet0_mtu;
+            }
+
+            if (d.radio_tweaks) {
+                document.getElementById('tweak-nr-sa').checked = d.nr_sa_enabled;
+                document.getElementById('tweak-nr-nsa').checked = d.nr_nsa_enabled;
+                document.getElementById('tweak-endc').checked = d.endc_enabled;
+                document.getElementById('tweak-lte-ca').checked = d.lte_ca_enabled;
+                document.getElementById('tweak-256qam').checked = (d.radio_tweaks.nr_256qam == 1);
+                document.getElementById('tweak-ul-mimo').checked = (d.radio_tweaks.nr_ul_mimo == 1);
+                document.getElementById('tweak-4rx').checked = (d.radio_tweaks.nr_dl_4rx == 1);
+                document.getElementById('sel-nr-ca-max').value = d.radio_tweaks.nr_ca_max_component || '2';
+                document.getElementById('sel-lte-ca-max').value = d.radio_tweaks.lte_ca_max_component || '4';
+            }
+
+            // Telephony switches
+            document.getElementById('sel-netmode').value = d.preferred_mode.split(',')[0];
+            document.getElementById('chk-volte').checked = d.volte_enabled;
+            document.getElementById('chk-vilte').checked = d.vilte_enabled;
+            document.getElementById('chk-vowifi').checked = d.vowifi_enabled;
+            document.getElementById('chk-smsip').checked = d.smsip_enabled;
+            document.getElementById('sel-wfc-mode').value = d.wfc_mode || "1";
+            document.getElementById('chk-mobile-data').checked = d.mobile_data;
+            document.getElementById('chk-roaming').checked = d.data_roaming;
+            document.getElementById('chk-sds').checked = d.smart_data_switch;
+
+            // Carrier matrix active highlight
+            const opName = (d.operator || '').toLowerCase();
+            document.getElementById('status-jio').className = opName.includes('jio') ? 'badge active' : 'badge';
+            document.getElementById('status-airtel').className = opName.includes('airtel') ? 'badge active' : 'badge';
+            document.getElementById('status-vi').className = (opName.includes('vi') || opName.includes('vodafone')) ? 'badge active' : 'badge';
+        }
+
         window.onload = () => {
             initMultiBandGrid();
+            const urlParam = new URLSearchParams(window.location.search).get('tab') || window.location.hash.replace('#', '');
+            const savedTab = urlParam || localStorage.getItem('activeTab') || 'dash';
+            switchTab(savedTab);
             loadStatus();
         };
-        setInterval(loadStatus, 4000);
+        setInterval(loadStatus, 3500);
     </script>
 </body>
 </html>
