@@ -1,14 +1,31 @@
-# 📡 Galaxy 5G Modem & Band Master v2.0 (by hoc)
+# 📡 Galaxy 5G Modem & Band Master v2.5 (by hoc)
 
-A dedicated, real-time cellular modem control panel, RF signal telemetry monitor, hardware band viewer, NR cell locker, and 5G NSA/SA architecture suite designed specifically for the **Samsung Galaxy M32 5G** (`SM-M326B` / MediaTek Dimensity 720 `MT6853`).
+A dedicated, real-time cellular modem control panel, RF signal telemetry monitor, multi-band locker, hardware carrier aggregation (CA) & EN-DC matrix, NR cell locker, and 5G NSA/SA architecture suite designed specifically for the **Samsung Galaxy M32 5G** (`SM-M326B` / MediaTek Dimensity 720 `MT6853`).
 
 Author: **hoc**
 
 ---
 
-## 🚀 Key Features in v2.0
+## 🚀 Key Features in v2.5
 
-### 1. 🔒 NR ARFCN & NR PCI Target Locking
+### 1. 🎛️ Multi-Band Locker & Carrier Aggregation (CA) Matrix
+- **Lock 2, 3, 4 or More Bands Together**: Configure a hardware multi-band whitelist mask to restrict the MediaTek modem strictly to your selected bands, rejecting unwanted slow or congested carriers.
+- **Lock 4G and 5G Bands Together**: Seamlessly combine 4G LTE anchor bands (B1, B3, B5, B8, B28, B40, B41) with 5G NR carriers (n78, n28, n40, n3, n1) simultaneously via **EN-DC (E-UTRA-NR Dual Connectivity / Option 3x)**.
+- **Use 2 and More Bands Simultaneously (Carrier Aggregation)**:
+  - Supports up to **3CC LTE CA** (aggregates up to 3 LTE carriers, e.g. B3 + B40 + B40 for up to 60 MHz bandwidth).
+  - Supports **2CC NR-CA** (aggregates 5G NR carriers in Standalone mode).
+  - Supports **EN-DC 4G+5G Channel Bonding** (e.g. B3 [20MHz] + B40 [20MHz] + n78 [100MHz] = 140 MHz aggregate bandwidth!).
+- **1-Tap Indian & Universal Presets**:
+  - 🚀 **Jio 5G Max Speed (n78 + n28 + B3 + B5 + B40)**: 5G SA + LTE anchors.
+  - ⚡ **Airtel 5G NSA Aggregation (n78 + B1 + B3 + B8 + B40)**: Pure EN-DC multi-band aggregation.
+  - 💎 **Pure 5G Dual-Band SA (n78 + n28)**: Locks only 5G NR Standalone bands without LTE fallback.
+  - 📶 **4G LTE 3CA / 4CA (B1 + B3 + B40 + B41)**: Maximum LTE-Advanced speed.
+  - ⚡ **Jio 4G 3CA (B3 + B5 + B40)**: Optimized Reliance Jio LTE aggregation.
+- **Live Lock Telemetry**: Real-time display of active whitelisted bands and dynamic status badge.
+- **1-Click Clear / Restore**: Instant release back to OEM full auto-band roaming.
+- **Samsung Official *#2263# Band Selection**: Direct hardware menu launcher.
+
+### 2. 🔒 NR ARFCN & NR PCI Target Locking
 - **Direct Target Locking**: Lock your device to a specific 5G carrier frequency (**NR-ARFCN**) and cell tower sector (**NR-PCI**).
 - **Prevents Down-Banding**: Keeps the device locked to high-capacity 100 MHz C-Band carriers without dropping down to low-band coverage layers.
 - **1-Click Presets for Indian Carriers**:

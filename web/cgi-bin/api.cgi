@@ -13,7 +13,8 @@ if [ "$REQUEST_METHOD" = "POST" ] && [ -n "$CONTENT_LENGTH" ] && [ "$CONTENT_LEN
 fi
 
 get_param() {
-    echo "$QUERY" | tr '&' '\n' | grep "^$1=" | head -n 1 | cut -d '=' -f 2- | tr -d '\r\n'
+    raw=$(echo "$QUERY" | tr '&' '\n' | grep "^$1=" | head -n 1 | cut -d '=' -f 2- | tr -d '\r\n')
+    echo "$raw" | sed 's/%2C/,/g; s/%20/ /g; s/%2B/+/g; s/%2F/\//g'
 }
 
 ACTION=$(get_param action)
@@ -87,6 +88,12 @@ case "$ACTION" in
         ;;
     set_cell_target)
         sh "$MM" set_cell_target "$ARFCN" "$PCI"
+        ;;
+    lock_bands)
+        sh "$MM" lock_bands "$VAL" "$SLOT"
+        ;;
+    clear_band_lock)
+        sh "$MM" clear_band_lock
         ;;
     revert)
         sh "$MM" revert
